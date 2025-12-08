@@ -6,8 +6,9 @@
                 <th>HN</th>
                 <th>ชื่อ-นามสกุล</th>
                 <th>วอร์ด</th>
+                <th>after ward</th>
                 <th>ชื่อ Lab</th>
-                <th>วันที่</th>
+                <th>req_date</th>
             </tr>
         </thead>
         <tbody>
@@ -16,6 +17,7 @@
                     <td>{{ $patient->hn }}</td>
                     <td>{{ $patient->name ?? '-' }}</td>
                     <td>{{ $patient->ward_name ?? '-' }}</td>
+                    <td>{!! $patient->after_ward ?? '-' !!}</td>
                     <td>{{ $patient->lab_name ?? '-' }}</td>
                     <td>{{ \App\Helpers\DateHelper::formatThaiDate($patient->req_date, 'full') }}</td>
                 </tr>

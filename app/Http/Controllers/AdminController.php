@@ -177,7 +177,7 @@ class AdminController extends Controller
 
             return redirect()->route('admin.management')->with('success', 'ลบสิทธิ์สำเร็จ');
         } catch (\Exception $e) {
-            return redirect()->route('admin.manahement')->with('error', 'เกิดข้อผิดพลาดในการลบสิทธิ์: ' . $e->getMessage());
+            return redirect()->route('admin.management')->with('error', 'เกิดข้อผิดพลาดในการลบสิทธิ์: ' . $e->getMessage());
         }
     }
 
@@ -264,7 +264,7 @@ class AdminController extends Controller
         }
     }
 
-    public function destroyNoity($id)
+    public function destroyNotify($id)
     {
         try {
             // ตรวจสอบว่าผู้ใช้มีบัญชีในตาราง telegram_subscribers หรือไม่

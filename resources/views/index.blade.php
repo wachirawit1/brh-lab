@@ -1,214 +1,212 @@
 @extends('layout.app')
 @section('title', 'รายชื่อผู้ป่วย')
 @section('content')
-    <div class="container-fluid my-4">
-        <!-- Header Section -->
-        <div class="row align-items-center mb-4">
-            <div class="col-md-6">
-                <h4 class="mb-0">
-                    <i class="fas fa-hospital-user text-primary me-2"></i>
-                    รายชื่อคนไข้
-                </h4>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <button id="addBotBtn"
-                    class="btn btn-outline-primary
+    <!-- Header Section -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h4 class="mb-0">
+                <i class="fas fa-hospital-user text-primary me-2"></i>
+                รายชื่อคนไข้
+            </h4>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <button id="addBotBtn"
+                class="btn btn-outline-primary
                {{ $telegram_status == 1 ? 'disabled' : '' }}"
-                    {{ $telegram_status == 1 ? 'disabled' : '' }}>
-                    <i class="fa-solid fa-bell me-1"></i>
-                    @if ($telegram_status == 0)
-                        รับการแจ้งเตือน
-                    @elseif ($telegram_allowed == 1)
-                        รับการแจ้งเตือนแล้ว
-                    @else
-                        Admin ปิดการแจ้งเตือนชั่วคราว
-                    @endif
-                </button>
-                <button class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#qrModal">
-                    <i class="fa-solid fa-qrcode me-1"></i>QR Code
-                </button>
-            </div>
+                {{ $telegram_status == 1 ? 'disabled' : '' }}>
+                <i class="fa-solid fa-bell me-1"></i>
+                @if ($telegram_status == 0)
+                    รับการแจ้งเตือน
+                @elseif ($telegram_allowed == 1)
+                    รับการแจ้งเตือนแล้ว
+                @else
+                    Admin ปิดการแจ้งเตือนชั่วคราว
+                @endif
+            </button>
+            <button class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#qrModal">
+                <i class="fa-solid fa-qrcode me-1"></i>QR Code
+            </button>
         </div>
+    </div>
 
-        <!-- Search and Filter Card -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-body">
-                <div class="row g-3">
-                    <!-- Search Input -->
-                    <div class="col-md-4">
-                        <label class="form-label">
-                            <i class="fas fa-search text-primary me-1"></i>ค้นหา
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="fas fa-search text-muted"></i>
-                            </span>
-                            <input type="search" id="search" class="form-control border-start-0"
-                                placeholder="ค้นหาด้วย ชื่อ, HN, เบอร์โทร...">
-                        </div>
-                    </div>
-
-                    <!-- Date Filter -->
-                    <div class="col-md-3">
-                        <label class="form-label">
-                            <i class="fas fa-calendar text-primary me-1"></i>วันที่
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="far fa-calendar text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" id="dateInput" name="date"
-                                placeholder="เลือกวันที่..." data-input>
-                            <button class="btn btn-outline-secondary" type="button" data-clear>
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Search Type -->
-                    <div class="col-md-2">
-                        <label class="form-label">
-                            <i class="fas fa-filter text-primary me-1"></i>ประเภท
-                        </label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="searchBy" id="all" checked>
-                            <label class="btn btn-outline-primary" for="all">
-                                <i class="fas fa-list-ul me-1"></i>ทั้งหมด
-                            </label>
-                            <input type="radio" class="btn-check" name="searchBy" id="ward">
-                            <label class="btn btn-outline-primary" for="ward">
-                                <i class="fas fa-hospital me-1"></i>วอร์ด
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Ward Select -->
-                    <div class="col-md-3">
-                        <label class="form-label">
-                            <i class="fas fa-hospital text-primary me-1"></i>เลือกวอร์ด
-                        </label>
-                        <select class="form-select d-none" id="wardSelect">
-                            <option value="" selected disabled>กรุณาเลือกวอร์ด</option>
-                            @foreach ($wards as $ward)
-                                <option value="{{ $ward->ward_id }}">{{ $ward->ward_id }} - {{ $ward->ward_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table Card -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <!-- Loading indicator -->
-                <div id="loading" class="text-center my-4" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">กำลังโหลด...</span>
+    <!-- Search and Filter Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Search Input -->
+                <div class="col-md-4">
+                    <label class="form-label">
+                        <i class="fas fa-search text-primary me-1"></i>ค้นหา
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="search" id="search" class="form-control border-start-0"
+                            placeholder="ค้นหาด้วย ชื่อ, HN, เบอร์โทร...">
                     </div>
                 </div>
 
-                <!-- Table Container -->
-                <div id="tableContainer">
-                    @include('patients.table')
+                <!-- Date Filter -->
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fas fa-calendar text-primary me-1"></i>วันที่
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="far fa-calendar text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="dateInput" name="date"
+                            placeholder="เลือกวันที่..." data-input>
+                        <button class="btn btn-outline-secondary" type="button" data-clear>
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Context Menu -->
-        <div class="dropdown-menu" id="contextMenu" style="position: fixed; z-index: 1050; display: none;">
-            <button class="dropdown-item" id="viewResult">ดูผล</button>
-            {{-- <button class="dropdown-item" id="editUser">แก้ไข</button>
-            <button class="dropdown-item text-danger" id="deleteUser">ลบ</button> --}}
-        </div>
+                <!-- Search Type -->
+                <div class="col-md-2">
+                    <label class="form-label">
+                        <i class="fas fa-filter text-primary me-1"></i>ประเภท
+                    </label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="searchBy" id="all" checked>
+                        <label class="btn btn-outline-primary" for="all">
+                            <i class="fas fa-list-ul me-1"></i>ทั้งหมด
+                        </label>
+                        <input type="radio" class="btn-check" name="searchBy" id="ward">
+                        <label class="btn btn-outline-primary" for="ward">
+                            <i class="fas fa-hospital me-1"></i>วอร์ด
+                        </label>
+                    </div>
+                </div>
 
-        <!-- ปุ่มลอย -->
-        <button id="chatButton" class="btn btn-primary">
-            <i class="fa-solid fa-message" style="color: #fafafa;"></i>
-        </button>
-
-        <!-- กล่องแชท -->
-        <div id="chatBox" class="border">
-            <div class="d-flex justify-content-between align-items-center p-2 border-bottom bg-light">
-                <strong>ทดสอบส่งข้อความ</strong>
-                <button type="button" class="btn-close" aria-label="Close" id="closeChat"></button>
-            </div>
-
-            <div class="p-3">
-                <div class="mb-2">
-                    <label class="form-label">เลือกผู้รับ:</label>
-                    <select id="chatUser" class="form-select">
-                        <option value="">-- เลือกผู้รับ --</option>
-                        @foreach ($users as $user)
-                            <option value="{{ $user->chat_id }}">{{ $user->pm }}</option>
+                <!-- Ward Select -->
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="fas fa-hospital text-primary me-1"></i>เลือกวอร์ด
+                    </label>
+                    <select class="form-select d-none" id="wardSelect">
+                        <option value="" selected disabled>กรุณาเลือกวอร์ด</option>
+                        @foreach ($wards as $ward)
+                            <option value="{{ $ward->ward_id }}">{{ $ward->ward_id }} - {{ $ward->ward_name }}</option>
                         @endforeach
                     </select>
                 </div>
-
-                <div class="mb-2">
-                    <textarea id="chatMessage" class="form-control" rows="3" placeholder="พิมพ์ข้อความ..."></textarea>
-                </div>
-
-                <button id="sendBtn" class="btn btn-success w-100">
-                    ส่งข้อความ
-                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Modal สำหรับแสดงผลข้อมูล -->
-        <!-- Lab Results Modal -->
-        <div class="modal fade" id="labModal" tabindex="-1" aria-labelledby="labModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="labModalLabel">
-                            <i class="fas fa-flask me-2"></i>ผลการตรวจทางห้องปฏิบัติการ
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-id-card text-muted me-2"></i>HN: <span id="lab-modal-hn"
-                                        class="text-primary"></span></h6>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="fas fa-user text-muted me-2"></i>ชื่อ: <span id="lab-modal-name"
-                                        class="text-primary"></span></h6>
-                            </div>
+    <!-- Table Card -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Loading indicator -->
+            <div id="loading" class="text-center my-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">กำลังโหลด...</span>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div id="tableContainer">
+                @include('patients.table')
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="dropdown-menu" id="contextMenu" style="position: fixed; z-index: 1050; display: none;">
+        <button class="dropdown-item" id="viewResult">ดูผล</button>
+        {{-- <button class="dropdown-item" id="editUser">แก้ไข</button>
+            <button class="dropdown-item text-danger" id="deleteUser">ลบ</button> --}}
+    </div>
+
+    <!-- ปุ่มลอย -->
+    <button id="chatButton" class="btn btn-primary">
+        <i class="fa-solid fa-message" style="color: #fafafa;"></i>
+    </button>
+
+    <!-- กล่องแชท -->
+    <div id="chatBox" class="border">
+        <div class="d-flex justify-content-between align-items-center p-2 border-bottom bg-light">
+            <strong>ทดสอบส่งข้อความ</strong>
+            <button type="button" class="btn-close" aria-label="Close" id="closeChat"></button>
+        </div>
+
+        <div class="p-3">
+            <div class="mb-2">
+                <label class="form-label">เลือกผู้รับ:</label>
+                <select id="chatUser" class="form-select">
+                    <option value="">-- เลือกผู้รับ --</option>
+                    @foreach ($users as $user)
+                        <option value="{{ $user->chat_id }}">{{ $user->pm }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-2">
+                <textarea id="chatMessage" class="form-control" rows="3" placeholder="พิมพ์ข้อความ..."></textarea>
+            </div>
+
+            <button id="sendBtn" class="btn btn-success w-100">
+                ส่งข้อความ
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal สำหรับแสดงผลข้อมูล -->
+    <!-- Lab Results Modal -->
+    <div class="modal fade" id="labModal" tabindex="-1" aria-labelledby="labModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="labModalLabel">
+                        <i class="fas fa-flask me-2"></i>ผลการตรวจทางห้องปฏิบัติการ
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-id-card text-muted me-2"></i>HN: <span id="lab-modal-hn"
+                                    class="text-primary"></span></h6>
                         </div>
-                        <hr>
-                        <div id="lab-results-container">
-                            <!-- ผลแลปจะแสดงที่นี่ -->
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user text-muted me-2"></i>ชื่อ: <span id="lab-modal-name"
+                                    class="text-primary"></span></h6>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-2"></i>ปิด
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>พิมพ์
-                        </button>
+                    <hr>
+                    <div id="lab-results-container">
+                        <!-- ผลแลปจะแสดงที่นี่ -->
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>ปิด
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>พิมพ์
+                    </button>
                 </div>
             </div>
         </div>
-        <!-- QR Code Modal -->
-        <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="qrModalLabel">
-                            <i class="fa-solid fa-qrcode me-2"></i>รับการแจ้งเตือนผ่าน Telegram (เฉพาะบุคคล)
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center py-4">
-                        {!! $qr !!}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-                    </div>
+    </div>
+    <!-- QR Code Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrModalLabel">
+                        <i class="fa-solid fa-qrcode me-2"></i>รับการแจ้งเตือนผ่าน Telegram (เฉพาะบุคคล)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    {!! $qr !!}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
                 </div>
             </div>
         </div>
@@ -492,332 +490,301 @@
     {{-- <script src="{{ asset('js/search.js') }}"></script> --}}
     <script>
         // search.js
-        $(document).ready(function() {
-            let searchTimeout;
-            let currentRequest = null;
-            let isSearching = false;
+        // ✅ script แก้ไขปัญหา: เลือกวันที่แสดงเฉพาะวันนั้น
+$(document).ready(function() {
+    let searchTimeout;
+    let currentRequest = null;
+    let isSearching = false;
 
-            // ค้นหาแบบ Real-time
-            $("#search").on("input", function() {
-                clearTimeout(searchTimeout);
-                const searchTerm = $(this).val();
+    // ค้นหา Text
+    $("#search").on("input", function() {
+        clearTimeout(searchTimeout);
+        const searchTerm = $(this).val();
 
-                // ยกเลิก request เก่าถ้ามี
-                if (currentRequest && currentRequest.readyState !== 4) {
-                    currentRequest.abort();
-                    currentRequest = null;
-                }
+        if (currentRequest && currentRequest.readyState !== 4) {
+            currentRequest.abort();
+        }
 
-                // รอให้พิมพ์เสร็จ 600ms
-                searchTimeout = setTimeout(function() {
-                    // ค้นหาต่อเมื่อ: ว่างเปล่า หรือ มีอักขระ >= 2 ตัว
-                    if (searchTerm.length === 0 || searchTerm.trim().length >= 2) {
-                        doSearch(1);
-                    }
-                }, 600);
-            });
-
-            $("#dateInput").on("change", function() {
-                const searchBy = $('input[name="searchBy"]:checked').attr("id");
-
-                if (searchBy === "all") {
-                    doSearch(1);
-                }
-            });
-
-            $("[data-clear]").on("click", function() {
-                // ตรวจสอบว่า input มีค่าหรือไม่
-                if ($("#dateInput").val() === "" || $("#dateInput").val() === null) {
-                    return; // ถ้าไม่มีค่า ไม่ทำอะไร
-                }
-                $("#dateInput").val("");
-
-                if (typeof fpicker !== "undefined" && fpicker) {
-                    fpicker.clear();
-                }
-
-                if ($('input[name="searchBy"]:checked').attr("id") === "all") {
-                    doSearch(1);
-                }
-            });
-
-            $("#wardSelect").on("change", function() {
-                if ($('input[name="searchBy"]:checked').attr("id") === "ward") {
-                    doSearch(1);
-                }
-            });
-
-            $('input[name="searchBy"]').on("change", function() {
-                const selectedMode = $(this).attr("id");
-
-                if (selectedMode === "ward") {
-                    $("#wardSelect").parent().show();
-                    $("#wardSelect").removeClass("d-none");
-
-                    $("#dateInput").val("");
-                    if (typeof fpicker !== "undefined") {
-                        fpicker.clear();
-                    }
-                } else {
-                    $("#wardSelect").parent().hide();
-                    $("#wardSelect").addClass("d-none");
-                    $("#wardSelect").val(null).trigger("change");
-                }
-
+        searchTimeout = setTimeout(function() {
+            if (searchTerm.length === 0 || searchTerm.trim().length >= 2) {
                 doSearch(1);
-            });
+            }
+        }, 600);
+    });
 
-            function doSearch(page = 1) {
-                // ป้องกันการค้นหาซ้ำซ้อน
-                if (isSearching) {
-                    console.log('⏸️ Search in progress, skipping...');
+    // ✅ เมื่อเลือกวันที่ ค้นหาทันที
+    $("#dateInput").on("change", function() {
+        console.log("📅 Date selected:", $(this).val());
+        doSearch(1);
+    });
+
+    // ✅ Clear วันที่ แล้วค้นหาใหม่
+    $("[data-clear]").on("click", function() {
+        if (!$("#dateInput").val()) return;
+
+        console.log("🗑️ Clearing date filter");
+        $("#dateInput").val("");
+
+        if (typeof fpicker !== "undefined" && fpicker) {
+            fpicker.clear();
+        }
+
+        doSearch(1);
+    });
+
+    // ✅ เลือก Ward ค้นหาทันที
+    $("#wardSelect").on("change", function() {
+        const wardValue = $(this).val();
+        if (!wardValue) return;
+
+        console.log("🏥 Ward selected:", wardValue);
+        doSearch(1);
+    });
+
+    // ✅ เปลี่ยนโหมด Search (All vs Ward)
+    $('input[name="searchBy"]').on("change", function() {
+        const selectedMode = $(this).attr("id");
+        console.log("🔄 Search mode changed:", selectedMode);
+
+        if (selectedMode === "ward") {
+            // ✅ เปลี่ยนเป็น Ward Mode
+            $("#wardSelect").parent().show();
+            $("#wardSelect").removeClass("d-none");
+
+            // ✅ ล้างค่า date เมื่อเปลี่ยน mode
+            $("#dateInput").val("");
+            if (typeof fpicker !== "undefined") {
+                fpicker.clear();
+            }
+        } else {
+            // ✅ เปลี่ยนเป็น All Mode
+            $("#wardSelect").parent().hide();
+            $("#wardSelect").addClass("d-none");
+            $("#wardSelect").val(null);
+
+            // ✅ ล้างค่า ward เมื่อเปลี่ยน mode
+        }
+
+        doSearch(1);
+    });
+
+    // ✅ ฟังก์ชันค้นหาหลัก
+    function doSearch(page = 1) {
+        if (isSearching) {
+            console.log('⏸️ Still searching, skip...');
+            return;
+        }
+
+        page = Math.max(1, parseInt(page) || 1);
+
+        // ✅ ดึงค่าจาก input ทีละครั้ง
+        const searchTerm = $("#search").val().trim();
+        const dateValue = $("#dateInput").val();
+        const wardValue = $("#wardSelect").val();
+        const searchBy = $('input[name="searchBy"]:checked').attr("id");
+
+        if (currentRequest && currentRequest.readyState !== 4) {
+            currentRequest.abort();
+        }
+
+        isSearching = true;
+        $("#loading").show();
+        $("#tableContainer").hide();
+
+        // ✅ สร้าง request object แบบว่าง
+        let requestData = {
+            page: page
+        };
+
+        // ✅ เพิ่มเงื่อนไขเดียว ๆ ตามที่มี
+        if (searchTerm && searchTerm.length >= 2) {
+            requestData.search = searchTerm;
+        }
+
+        // ✅ ถ้า All Mode
+        if (searchBy === "all") {
+            // ✅ ส่ง date ถ้ามีเท่านั้น
+            if (dateValue) {
+                requestData.date = dateValue;
+            }
+            // ✅ ไม่ส่ง ward
+        }
+
+        // ✅ ถ้า Ward Mode
+        if (searchBy === "ward") {
+            // ✅ ส่ง ward ถ้ามีเท่านั้น
+            if (wardValue) {
+                requestData.ward = wardValue;
+            }
+            // ✅ ไม่ส่ง date
+        }
+
+        console.log('🔍 Search params:', requestData);
+        console.log('📋 Final request:', JSON.stringify(requestData));
+
+        currentRequest = $.ajax({
+            url: window.location.pathname,
+            type: "GET",
+            data: requestData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            success: function(response) {
+                console.log('✅ Search success, rows:', response.html ? $(response.html).find('tbody tr').length : 0);
+
+                if (response.html) {
+                    $("#tableContainer").html(response.html);
+                }
+
+                if (response.pagination) {
+                    $("#paginationContainer").html(response.pagination);
+                }
+
+                if (typeof addContextMenuToRows === "function") {
+                    addContextMenuToRows();
+                }
+
+                updateURL(requestData);
+            },
+            error: function(xhr, status, error) {
+                if (status === 'abort') {
+                    console.log('⏹️ Request aborted');
                     return;
                 }
 
-                page = Math.max(1, parseInt(page) || 1);
+                console.error('❌ Error:', error);
+                let errorMsg = "เกิดข้อผิดพลาดในการค้นหา";
 
-                const searchTerm = $("#search").val().trim();
-                const dateValue = $("#dateInput").val();
-                const wardValue = $("#wardSelect").val();
-                const searchBy = $('input[name="searchBy"]:checked').attr("id");
-
-                // ยกเลิก request เก่า
-                if (currentRequest && currentRequest.readyState !== 4) {
-                    currentRequest.abort();
-                    currentRequest = null;
+                if (xhr.responseJSON?.message) {
+                    errorMsg = xhr.responseJSON.message;
                 }
 
-                isSearching = true;
-                $("#loading").show();
-                $("#tableContainer").hide();
-
-                let requestData = {
-                    page: page,
-                };
-
-                // ต้องมีอย่างน้อย 2 ตัวอักษรถึงจะค้นหา
-                if (searchTerm && searchTerm.length >= 2) {
-                    requestData.search = searchTerm;
-                }
-
-                if (searchBy === "all" && dateValue) {
-                    requestData.date = dateValue;
-                }
-
-                if (searchBy === "ward" && wardValue) {
-                    requestData.ward = wardValue;
-                }
-
-                console.log('🔍 Searching:', requestData);
-
-                currentRequest = $.ajax({
-                    url: window.location.pathname,
-                    type: "GET",
-                    data: requestData,
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                    beforeSend: function(xhr) {
-                        // เก็บ request object
-                        currentRequest = xhr;
-                    },
-                    success: function(response) {
-                        console.log('✅ Success');
-
-                        if (response.html) {
-                            $("#tableContainer").html(response.html);
-                        } else {
-                            console.warn('No HTML in response');
-                        }
-
-                        if (response.pagination) {
-                            $("#paginationContainer").html(response.pagination);
-                        } else {
-                            $("#paginationContainer").empty();
-                        }
-
-                        if (typeof addContextMenuToRows === "function") {
-                            addContextMenuToRows();
-                        }
-
-                        updateURL(requestData);
-                    },
-                    error: function(xhr, status, error) {
-                        // ไม่แสดง error ถ้าถูก abort
-                        if (status === 'abort') {
-                            console.log('⏹️ Request aborted');
-                            return;
-                        }
-
-                        console.error('❌ Error:', {
-                            status: status,
-                            error: error,
-                            response: xhr.responseJSON
-                        });
-
-                        let errorMessage = "เกิดข้อผิดพลาดในการค้นหา";
-
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
-
-                        alert(errorMessage);
-                    },
-                    complete: function() {
-                        // เรียกเสมอไม่ว่าจะสำเร็จหรือไม่
-                        isSearching = false;
-                        currentRequest = null;
-                        $("#loading").hide();
-                        $("#tableContainer").show();
-                    }
-                });
-            }
-
-            // window.doSearch = doSearch;
-
-            function updateURL(params) {
-                const newUrl = new URL(window.location.href);
-
-                newUrl.searchParams.delete("search");
-                newUrl.searchParams.delete("date");
-                newUrl.searchParams.delete("ward");
-                newUrl.searchParams.delete("page");
-
-                Object.keys(params).forEach((key) => {
-                    if (params[key]) {
-                        newUrl.searchParams.set(key, params[key]);
-                    }
-                });
-
-                window.history.pushState({}, "", newUrl);
-            }
-
-            $(document).on("click", ".pagination a", function(e) {
-                e.preventDefault();
-
-                const url = $(this).attr("href");
-                if (!url) return;
-
-                const urlParams = new URLSearchParams(url.split("?")[1]);
-                const page = Math.max(1, parseInt(urlParams.get("page")) || 1);
-
-                console.log('📄 Go to page:', page);
-
-                doSearch(page);
-
-                $("html, body").animate({
-                    scrollTop: $("#tableContainer").offset().top - 100,
-                }, 300);
-            });
-
-            $('input[name="searchBy"]:checked').trigger("change");
-        });
-    </script>
-    <script>
-        let fpicker;
-
-        $(document).ready(function() {
-            // Initialize Flatpickr
-            fpicker = flatpickr("#dateInput", {
-                locale: "th",
-                dateFormat: "Y-m-d",
-                altFormat: "j F Y",
-                altInput: true,
-                allowInput: true,
-                monthSelectorType: 'static',
-                yearSelectorType: 'static',
-                disableMobile: true,
-                maxDate: "today",
-                theme: "material_blue",
-                plugins: [],
-                onChange: function(selectedDates, dateStr, instance) {
-                    console.log("📅 Date selected:", dateStr);
-
-                    const searchBy = $('input[name="searchBy"]:checked').attr("id");
-
-                    if (searchBy === "all" && typeof window.doSearch === 'function') {
-                        window.doSearch();
-                    } else {
-                        console.warn("doSearch not available or not in 'all' mode");
-                    }
-                }
-            });
-
-            // Initialize Select2
-            $('#wardSelect').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'ค้นหาวอร์ด...',
-                allowClear: true,
-                language: {
-                    noResults: function() {
-                        return "ไม่พบวอร์ดที่ค้นหา";
-                    }
-                }
-            });
-
-            // จัดการการเปลี่ยนแปลงของ radio buttons
-            document.querySelectorAll('input[name="searchBy"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const wardSelect = $('#wardSelect');
-                    const dateInput = $('#dateInput');
-
-                    if (this.id === 'ward') {
-                        // แสดง ward select และซ่อน date input
-                        wardSelect.parent().show();
-                        wardSelect.removeClass('d-none');
-                        dateInput.val(''); // รีเซ็ตค่าวันที่
-                    } else {
-                        // ซ่อน ward select
-                        wardSelect.parent().hide();
-                        wardSelect.addClass('d-none');
-                        wardSelect.val(null).trigger('change'); // รีเซ็ตค่า ward
-                    }
-                });
-            });
-
-            // เรียกใช้ event change ครั้งแรกเพื่อตั้งค่าเริ่มต้น
-            document.querySelector('input[name="searchBy"]:checked').dispatchEvent(new Event('change'));
-        });
-
-        // ปุ่มแชท
-        document.getElementById('chatButton').addEventListener('click', function() {
-            const box = document.getElementById('chatBox');
-            box.style.display = (box.style.display === 'block') ? 'none' : 'block';
-        });
-
-        document.getElementById('closeChat').addEventListener('click', function() {
-            document.getElementById('chatBox').style.display = 'none';
-        });
-
-        document.getElementById('sendBtn').addEventListener('click', async function() {
-            const chatUser = document.getElementById('chatUser').value;
-            const chatMessage = document.getElementById('chatMessage').value;
-
-            if (!chatUser || !chatMessage.trim()) {
-                alert('⚠️ กรุณาเลือกผู้รับและพิมพ์ข้อความ');
-                return;
-            }
-
-            const res = await fetch('/telegram/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    chat_id: chatUser,
-                    message: chatMessage
-                })
-            });
-
-            const data = await res.json();
-            if (data.status === 'ok') {
-                alert('✅ ส่งข้อความสำเร็จ');
-                document.getElementById('chatMessage').value = '';
-            } else {
-                alert('❌ ส่งไม่สำเร็จ: ' + (data.message || 'ไม่ทราบสาเหตุ'));
+                $("#tableContainer").html(`
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-triangle"></i> ${errorMsg}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `);
+            },
+            complete: function() {
+                isSearching = false;
+                currentRequest = null;
+                $("#loading").hide();
+                $("#tableContainer").show();
             }
         });
+    }
+
+    function updateURL(params) {
+        const newUrl = new URL(window.location.href);
+
+        // ✅ ล้างค่าเก่าทั้งหมด
+        newUrl.searchParams.delete("search");
+        newUrl.searchParams.delete("date");
+        newUrl.searchParams.delete("ward");
+        newUrl.searchParams.delete("page");
+
+        // ✅ เพิ่มค่าใหม่เดียว ๆ
+        Object.keys(params).forEach((key) => {
+            if (params[key]) {
+                newUrl.searchParams.set(key, params[key]);
+            }
+        });
+
+        window.history.pushState({}, "", newUrl);
+    }
+
+    // ✅ Pagination
+    $(document).on("click", ".pagination a", function(e) {
+        e.preventDefault();
+
+        const url = $(this).attr("href");
+        if (!url) return;
+
+        const urlParams = new URLSearchParams(url.split("?")[1]);
+        const page = Math.max(1, parseInt(urlParams.get("page")) || 1);
+
+        console.log('📄 Pagination page:', page);
+        doSearch(page);
+
+        $("html, body").animate({
+            scrollTop: $("#tableContainer").offset().top - 100
+        }, 300);
+    });
+
+    // ✅ ตั้งค่าเริ่มต้น
+    document.querySelector('input[name="searchBy"]:checked')?.dispatchEvent(new Event('change'));
+});
+
+// Flatpickr config
+let fpicker;
+
+$(document).ready(function() {
+    fpicker = flatpickr("#dateInput", {
+        locale: "th",
+        dateFormat: "Y-m-d",
+        altFormat: "j F Y",
+        altInput: true,
+        allowInput: true,
+        monthSelectorType: 'static',
+        yearSelectorType: 'static',
+        disableMobile: true,
+        maxDate: "today",
+        theme: "material_blue"
+    });
+
+    // ✅ Select2 config
+    $('#wardSelect').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'ค้นหาวอร์ด...',
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "ไม่พบวอร์ด";
+            }
+        }
+    });
+});
+
+// Chat
+document.getElementById('chatButton').addEventListener('click', function() {
+    const box = document.getElementById('chatBox');
+    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+});
+
+document.getElementById('closeChat').addEventListener('click', function() {
+    document.getElementById('chatBox').style.display = 'none';
+});
+
+document.getElementById('sendBtn').addEventListener('click', async function() {
+    const chatUser = document.getElementById('chatUser').value;
+    const chatMessage = document.getElementById('chatMessage').value;
+
+    if (!chatUser || !chatMessage.trim()) {
+        alert('⚠️ กรุณาเลือกผู้รับและพิมพ์ข้อความ');
+        return;
+    }
+
+    const res = await fetch('/telegram/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            chat_id: chatUser,
+            message: chatMessage
+        })
+    });
+
+    const data = await res.json();
+    if (data.status === 'ok') {
+        alert('✅ ส่งข้อความสำเร็จ');
+        document.getElementById('chatMessage').value = '';
+    } else {
+        alert('❌ ส่งไม่สำเร็จ: ' + (data.message || 'ไม่ทราบสาเหตุ'));
+    }
+});
     </script>
 @endpush

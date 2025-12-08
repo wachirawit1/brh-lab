@@ -135,9 +135,10 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-6 text-gray-500 text-sm">
-            <p>© 2025 พัฒนาโดย นายวชิรวิทย์ กุลสุทธิชัย </p>
-        </div>
+        <footer class="mt-4" style="text-align:center; color:#6c757d; font-size:0.875rem;">
+            © {{ date('Y') }} Project Name — เวอร์ชัน {{ env('APP_VERSION', '1.0.0') }}.
+            พัฒนาโดย <a href="#" target="_blank">นายวชิรวิทย์ กุลสุทธิชัย</a>
+        </footer>
     </div>
 
     <script>

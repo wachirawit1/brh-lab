@@ -47,5 +47,5 @@ Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function ()
     Route::post('/admin/roles/store', [AdminController::class, 'storeRole'])->name('admin.roles.store');
     Route::delete('/admin/roles/destroy/{id}', [AdminController::class, 'destroyRole'])->name('admin.roles.destroy');
 
-    Route::delete('/admin/notify-management/destroy/{id}', [AdminController::class, 'destroyNoity'])->name('admin.deleteNotificationSubscriber');
+    Route::delete('/admin/notify-management/destroy/{id}', [AdminController::class, 'destroyNotify'])->name('admin.deleteNotificationSubscriber');
 });

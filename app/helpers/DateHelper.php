@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Carbon\Carbon;
+
 class DateHelper
 {
     /**
@@ -43,6 +45,54 @@ class DateHelper
     }
 
     /**
+     * แปลง DateTime เป็นรูปแบบวันที่ไทย พร้อมเวลา
+     *
+     * @param string|Carbon $datetime รูปแบบ '2025-10-09 11:29:16' หรือ Carbon object
+     * @param string $format 'short' = 9 ต.ค. 2568 11:29, 'full' = 9 ตุลาคม 2568 11:29:16
+     * @return string
+     */
+    public static function formatThaiDateTime($datetime, $format = 'short')
+    {
+        if (empty($datetime)) {
+            return '';
+        }
+
+        try {
+            $carbon = $datetime instanceof Carbon ? $datetime : Carbon::parse($datetime);
+
+            $thaiMonthsShort = [
+                1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.',
+                4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
+                7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.',
+                10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
+            ];
+
+            $thaiMonthsFull = [
+                1 => 'มกราคม', 2 => 'กุมภาพันธ์', 3 => 'มีนาคม',
+                4 => 'เมษายน', 5 => 'พฤษภาคม', 6 => 'มิถุนายน',
+                7 => 'กรกฎาคม', 8 => 'สิงหาคม', 9 => 'กันยายน',
+                10 => 'ตุลาคม', 11 => 'พฤศจิกายน', 12 => 'ธันวาคม'
+            ];
+
+            $day = $carbon->day;
+            $month = $carbon->month;
+            $year = $carbon->year + 543; // แปลงเป็น พ.ศ.
+            $time = $carbon->format('H:i');
+
+            if ($format === 'full') {
+                $seconds = $carbon->format(':s');
+                return $day . ' ' . $thaiMonthsFull[$month] . ' ' . $year . ' ' . $time . $seconds;
+            }
+
+            // format = 'short' (default)
+            return $day . ' ' . $thaiMonthsShort[$month] . ' ' . $year . ' ' . $time;
+
+        } catch (\Exception $e) {
+            return $datetime;
+        }
+    }
+
+    /**
      * แปลงวันที่จาก 25681017 เป็น 2568-10-17
      */
     public static function toISO($dateString)
@@ -71,6 +121,6 @@ class DateHelper
         $month = substr($dateString, 4, 2);
         $day = substr($dateString, 6, 2);
 
-        return \Carbon\Carbon::createFromFormat('Y-m-d', $year . '-' . $month . '-' . $day);
+        return Carbon::createFromFormat('Y-m-d', $year . '-' . $month . '-' . $day);
     }
 }

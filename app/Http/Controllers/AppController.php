@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Helpers\DateHelper;
 use Carbon\Carbon;
 
 class AppController extends Controller
@@ -102,7 +103,19 @@ class AppController extends Controller
             $countResult = DB::connection('sqlsrv')->select($countSql, $countBindings);
             $totalCount = $countResult[0]->total ?? 0;
 
-            // Query หลัก
+             // Query หลัก
+            $afterWardSubquery = "
+                STUFF((
+                    SELECT '<--' + RTRIM(w2.ward_name)
+                    FROM dbo.Resident rs WITH (NOLOCK)
+                    LEFT JOIN dbo.Ward w2 WITH (NOLOCK) ON w2.ward_id = rs.ward_id
+                    WHERE rs.hn = i.hn AND rs.regist_flag = i.regist_flag
+                        AND rs.res_backup_stat <> 'R'
+                    ORDER BY rs.check_in_date DESC, rs.check_in_time DESC
+                    FOR XML PATH('')
+                ), 1, 0, '')
+                ";
+
             $sql = "
                 SELECT
                     i.hn,
@@ -111,12 +124,7 @@ class AppController extends Controller
                     RTRIM(ISNULL(t.titleName,'')) + RTRIM(ISNULL(pt.firstName,'')) + '  ' + RTRIM(ISNULL(pt.lastName,'')) as name,
                     i.ward_id,
                     RTRIM(ISNULL(w.ward_name,'')) as ward_name,
-                    (SELECT TOP 1 RTRIM(ISNULL(w2.ward_name,''))
-                     FROM dbo.Resident rs WITH (NOLOCK)
-                     LEFT JOIN dbo.Ward w2 WITH (NOLOCK) ON w2.ward_id = rs.ward_id
-                     WHERE rs.hn = i.hn AND rs.regist_flag = i.regist_flag
-                           AND rs.res_backup_stat <> 'R'
-                     ORDER BY rs.check_in_date DESC, rs.check_in_time DESC) as after_ward,
+                    {$afterWardSubquery} as after_ward,
                     lh.req_date,
                     lh.req_no,
                     lh.res_ok,
@@ -212,7 +220,14 @@ class AppController extends Controller
                 ->where('hn', $hn)
                 ->orderBy('res_date', 'desc')
                 ->limit(10) // จำกัดผลลัพธ์
-                ->get();
+                ->get()
+                ->map(function ($lab) {
+                    return [
+                        'res_date' => DateHelper::formatThaiDateTime($lab->res_date, 'full'),
+                        'resText' => $lab->resText,
+
+                    ];
+                });
 
             return response()->json([
                 'labResults' => $labResults,

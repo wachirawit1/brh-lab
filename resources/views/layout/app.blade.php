@@ -18,6 +18,15 @@
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
 
     <style>
+        .lab-names {
+            max-width: 300px;
+        }
+
+        .badge {
+            font-size: 0.85em;
+            font-weight: normal;
+        }
+
         tr.cursor-pointer {
             cursor: pointer;
         }
@@ -112,9 +121,19 @@
         @endif
     </div>
 
-    <div class="container">
+    <div class="container-fluid my-4">
         @yield('content')
     </div>
+
+    <!-- Footer: เครดิตและเวอร์ชัน -->
+    <footer class="bg-light text-center text-muted py-3 mt-4 mt-auto">
+        <div class="container">
+            <small>
+                © {{ date('Y') }} Project Name — เวอร์ชัน {{ env('APP_VERSION', '1.0.0') }}.
+                พัฒนาโดย <a href="http://192.168.10.11:8080" target="_blank" class="text-decoration-none">นาย วชิรวิทย์ กุลสุทธิชัย</a>
+            </small>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://kit.fontawesome.com/1b13c5849c.js" crossorigin="anonymous"></script>
