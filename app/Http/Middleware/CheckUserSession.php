@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserSession
@@ -22,17 +23,45 @@ class CheckUserSession
             return redirect('/login')->with('error', 'กรุณาเข้าสู่ระบบก่อน');
         }
 
+        // 1. ตรวจสอบว่าผู้ใช้ยังมีสิทธิ์อยู่ในระบบฐานข้อมูลจริงๆ หรือไม่ (Real-time Guard)
+        $userDB = DB::connection('mysql')->table('account_role')
+            ->where('username', Session::get('user.username'))
+            ->first();
+
+        if (!$userDB) {
+            Session::forget('user');
+            Auth::logout();
+            return redirect('/login')->with('error', 'บัญชีของคุณถูกระงับหรือไม่มีสิทธิ์เข้าใช้งาน');
+        }
+
         $lastActivity = Session::get('user.last_activity');
         $now = now();
 
-        // ตรวจสอบว่า session หมดอายุหรือไม่
+        // 2. ตรวจสอบว่า session หมดอายุหรือไม่
         if ($now->diffInMinutes($lastActivity) > $this->timeout) {
             Session::forget('user');
             Auth::logout();
             return redirect('/login')->with('error', 'Session หมดอายุ กรุณาล็อคอินใหม่');
         }
 
-        // อัปเดตเวลาการใช้งานล่าสุด
+        // 3. บันทึก/อัปเดตข้อมูลการใช้งานลงในตาราง app_user_sessions
+        try {
+            DB::connection('mysql')->table('app_user_sessions')->updateOrInsert(
+                ['session_id' => Session::getId()],
+                [
+                    'username' => Session::get('user.username'),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'last_page' => $request->fullUrl(),
+                    'last_activity' => $now,
+                    'updated_at' => $now
+                ]
+            );
+        } catch (\Exception $e) {
+            // ข้ามไปหากตารางยังไม่ถูกสร้าง
+        }
+
+        // อัปเดตเวลาการใช้งานล่าสุดใน session
         Session::put('user.last_activity', $now);
 
         return $next($request);

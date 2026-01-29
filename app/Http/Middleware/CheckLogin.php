@@ -17,7 +17,7 @@ class CheckLogin
     {
         if (!session()->has('user') || session('user.logged_in') !== true) {
             session(['url.intended' => url()->current()]);
-            return redirect()->route('loginForm')->with('error', 'กรุณาเข้าสู่ระบบ');
+            return redirect()->route('loginForm');
         }
 
         return $next($request);

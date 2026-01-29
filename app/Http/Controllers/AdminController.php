@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -42,7 +43,17 @@ class AdminController extends Controller
             ->table('role')
             ->get();
 
-        return view('admin.management', compact('users', 'roles'));
+        // ดึงข้อมูลผู้ใช้งานที่กำลังออนไลน์ (Active ภายใน 5 นาทีล่าสุด)
+        $activeSessions = collect();
+        if (Schema::connection('mysql')->hasTable('app_user_sessions')) {
+            $activeSessions = DB::connection('mysql')
+                ->table('app_user_sessions')
+                ->where('last_activity', '>=', now()->subMinutes(5))
+                ->get()
+                ->keyBy('username');
+        }
+
+        return view('admin.management', compact('users', 'roles', 'activeSessions'));
     }
     public function findUser(Request $request)
     {
@@ -78,7 +89,17 @@ class AdminController extends Controller
             return $user;
         });
 
-        return view('admin.management', compact('users', 'roles'));
+        // ดึงข้อมูลผู้ใช้งานที่กำลังออนไลน์ (Active ภายใน 5 นาทีล่าสุด)
+        $activeSessions = collect();
+        if (Schema::connection('mysql')->hasTable('app_user_sessions')) {
+            $activeSessions = DB::connection('mysql')
+                ->table('app_user_sessions')
+                ->where('last_activity', '>=', now()->subMinutes(5))
+                ->get()
+                ->keyBy('username');
+        }
+
+        return view('admin.management', compact('users', 'roles', 'activeSessions'));
     }
     // กำหนดสิทธิ์
     public function setRole(Request $request, $username)
@@ -133,7 +154,7 @@ class AdminController extends Controller
                 ->where('username', $username)
                 ->delete();
 
-            return redirect()->route('admin')->with('success', 'ลบผู้ใช้สำเร็จ');
+            return response()->json(['success' => 'ลบผู้ใช้สำเร็จ']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'เกิดข้อผิดพลาดในการลบผู้ใช้: ' . $e->getMessage()], 500);
         }
@@ -166,7 +187,7 @@ class AdminController extends Controller
                 ->exists();
 
             if ($isUsed) {
-                return redirect()->route('admin')->with('error', 'ไม่สามารถลบสิทธิ์นี้ได้ เนื่องจากมีการใช้งานอยู่');
+                return response()->json(['error' => 'ไม่สามารถลบสิทธิ์นี้ได้ เนื่องจากมีการใช้งานอยู่'], 422);
             }
 
             // ลบสิทธิ์
@@ -175,9 +196,9 @@ class AdminController extends Controller
                 ->where('id', $id)
                 ->delete();
 
-            return redirect()->route('admin.management')->with('success', 'ลบสิทธิ์สำเร็จ');
+            return response()->json(['success' => 'ลบสิทธิ์สำเร็จ']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.management')->with('error', 'เกิดข้อผิดพลาดในการลบสิทธิ์: ' . $e->getMessage());
+            return response()->json(['error' => 'เกิดข้อผิดพลาดในการลบสิทธิ์: ' . $e->getMessage()], 500);
         }
     }
 
