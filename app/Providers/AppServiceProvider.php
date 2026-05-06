@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +23,9 @@ class AppServiceProvider extends ServiceProvider
         // For SQL Server pagination
         \Illuminate\Pagination\Paginator::defaultView('pagination::bootstrap-4');
         \Illuminate\Pagination\Paginator::defaultSimpleView('pagination::simple-bootstrap-4');
+
+        if (app()->environment('production')) {
+            //URL::forceScheme('https');
+        }
     }
 }

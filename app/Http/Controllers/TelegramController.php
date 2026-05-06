@@ -115,16 +115,16 @@ class TelegramController extends Controller
                             $chatData = $this->prepareChatData($update);
                             $chatId = $chatData['chat_id'];
 
-                            $existingChat = DB::table('telegram_subscribers')->where('chat_id', $chatId)->first();
+                            $existingChat = DB::connection('mysql')->table('telegram_subscribers')->where('chat_id', $chatId)->first();
 
                             if ($existingChat) {
-                                DB::table('telegram_subscribers')
+                                DB::connection('mysql')->table('telegram_subscribers')
                                     ->where('chat_id', $chatId)
                                     ->update($chatData);
                                 $updatedChats++;
                                 $status = 'updated';
                             } else {
-                                DB::table('telegram_subscribers')->insert($chatData);
+                                DB::connection('mysql')->table('telegram_subscribers')->insert($chatData);
                                 $newChats++;
                                 $status = 'new';
                             }

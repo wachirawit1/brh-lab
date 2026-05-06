@@ -11,6 +11,74 @@ use Carbon\Carbon;
 
 class AppController extends Controller
 {
+    private const PATMED_INV_CODES = [
+        '1A014A',
+        '1A027A',
+        '1A026E',
+        '1A026F',
+        '1A026D',
+        '1A026B',
+        '1A029A',
+        '1A030A',
+        '1A049A',
+        '1A049B',
+        '1A049D',
+        '1C015A',
+        '1C064B',
+        '1C064A',
+        '1C018A',
+        '1C019A',
+        '1C020A',
+        '1C023A',
+        '1C024A',
+        '1C024B',
+        '1C026D',
+        '1C027D',
+        '1C041A',
+        '1C042A',
+        '1C042B',
+        '1C049A',
+        '1C055B',
+        '1T029A',
+        '1T029B',
+        '1D045A',
+        '1D042A',
+        '1D038A',
+        '1E006A',
+        '1E007A',
+        '1F032B',
+        '1G004A',
+        '1I002A',
+        '1L022A',
+        '1L022C',
+        '1M010A',
+        '1M022B',
+        '1M043C',
+        '1M043B',
+        '1N004A',
+        '1N012B',
+        '1O002C',
+        '1P006A',
+        '1P047A',
+        '1P007B',
+        '1P019A',
+        '1R015A',
+        '1S015A',
+        '1S046A',
+        '1T033A',
+        '1V022B',
+        '1A027C',
+        '1A027B',
+        '1A027D',
+        '1C026A',
+        '1C038C',
+        '1C038B',
+        '1T029C',
+        '1D045B',
+        '1E007B',
+        '1M022A',
+    ];
+
     public function index(Request $request)
     {
         try {
@@ -78,7 +146,13 @@ class AppController extends Controller
             }
 
             // สร้าง WHERE clause
-            $whereClause = "WHERE ld.lab_type = 'MB' AND lh.lconfirm = 'Y'";
+            $whereClause = "WHERE EXISTS (
+                SELECT 1
+                FROM dbo.Patmed pm WITH (NOLOCK)
+                WHERE pm.hn = i.hn
+                  AND pm.registNo = i.regist_flag
+                  AND pm.invCode IN ('" . implode("','", self::PATMED_INV_CODES) . "')
+            )";
             if (!empty($whereConditions)) {
                 $whereClause .= " AND " . implode(" AND ", $whereConditions);
             }
@@ -88,8 +162,13 @@ class AppController extends Controller
                 FROM dbo.Ipd_h i WITH (NOLOCK)
                 LEFT JOIN dbo.PATIENT pt WITH (NOLOCK) ON pt.hn = i.hn
                 LEFT JOIN dbo.PTITLE t WITH (NOLOCK) ON t.titleCode = pt.titleCode
-                LEFT JOIN dbo.Labreq_h lh WITH (NOLOCK) ON lh.hn = i.hn AND lh.reg_flag = i.regist_flag
-                LEFT JOIN dbo.Labreq_d ld WITH (NOLOCK) ON ld.req_no = lh.req_no
+                INNER JOIN dbo.Labreq_h lh WITH (NOLOCK)
+                    ON lh.hn = i.hn
+                    AND lh.reg_flag = i.regist_flag
+                    AND lh.lconfirm = 'Y'
+                INNER JOIN dbo.Labreq_d ld WITH (NOLOCK)
+                    ON ld.req_no = lh.req_no
+                    AND ld.lab_type = 'MB'
                 LEFT JOIN dbo.Ward w WITH (NOLOCK) ON w.ward_id = i.ward_id
                 {$whereClause}
             ";
@@ -103,17 +182,17 @@ class AppController extends Controller
             $countResult = DB::connection('sqlsrv')->select($countSql, $countBindings);
             $totalCount = $countResult[0]->total ?? 0;
 
-             // Query หลัก
+            // Query หลัก
             $afterWardSubquery = "
                 STUFF((
-                    SELECT '<--' + RTRIM(w2.ward_name)
+                    SELECT ' <--' + RTRIM(w2.ward_name)
                     FROM dbo.Resident rs WITH (NOLOCK)
                     LEFT JOIN dbo.Ward w2 WITH (NOLOCK) ON w2.ward_id = rs.ward_id
                     WHERE rs.hn = i.hn AND rs.regist_flag = i.regist_flag
                         AND rs.res_backup_stat <> 'R'
                     ORDER BY rs.check_in_date DESC, rs.check_in_time DESC
-                    FOR XML PATH('')
-                ), 1, 0, '')
+                    FOR XML PATH(''), TYPE
+                ).value('.', 'nvarchar(max)'), 1, 4, '')
                 ";
 
             $sql = "
@@ -125,6 +204,7 @@ class AppController extends Controller
                     i.ward_id,
                     RTRIM(ISNULL(w.ward_name,'')) as ward_name,
                     {$afterWardSubquery} as after_ward,
+                    ld.hn as ld_hn,
                     lh.req_date,
                     lh.req_no,
                     lh.res_ok,

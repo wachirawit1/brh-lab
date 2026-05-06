@@ -21,6 +21,22 @@ Route::middleware(['guest.custom'])->group(function () {
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// เช็คสถานะ Session (ใช้โดย JavaScript Polling)
+Route::get('/check-session', function () {
+    if (session()->has('user') && session('user.logged_in') === true) {
+        // เช็คเวลา last_activity แบบเดียวกับใน CheckUserSession Middleware
+        $lastActivity = session('user.last_activity');
+        if ($lastActivity && now()->diffInMinutes($lastActivity) > 60) {
+            session()->forget('user'); // เคลียร์ session
+            \Illuminate\Support\Facades\Auth::logout();
+            return response()->json(['alive' => false, 'message' => 'Session Expired'], 401);
+        }
+
+        return response()->json(['alive' => true]);
+    }
+    return response()->json(['alive' => false], 401);
+})->name('session.ping');
+
 // ฝั่ง User ทั่วไป
 Route::middleware(['logged.in', 'check.session'])->group(function () {
     Route::get('/index', [AppController::class, 'index'])->name('index');
@@ -42,7 +58,7 @@ Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function ()
     Route::get('/admin/findUser', [AdminController::class, 'findUser'])->name('admin.findUser');
 
     Route::post('/admin/users/{username}/set-role', [AdminController::class, 'setRole'])->name('admin.users.setRole');
-    Route::delete('/admin/users/{userid}/destroy', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+    Route::delete('/admin/users/{username}/destroy', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
 
     Route::post('/admin/roles/store', [AdminController::class, 'storeRole'])->name('admin.roles.store');
     Route::delete('/admin/roles/destroy/{id}', [AdminController::class, 'destroyRole'])->name('admin.roles.destroy');

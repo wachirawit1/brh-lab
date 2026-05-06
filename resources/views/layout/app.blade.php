@@ -200,6 +200,44 @@
                 })
                 .catch(err => console.error("Fetch error:", err));
         }, 10000);
+
+        // ===== SESSION GUARD =====
+        let sessionAlertShown = false; // กันไม่ให้ Alert ขึ้นซ้ำ
+
+        // ฟังก์ชันแสดง Alert แล้วเด้งไป Login
+        function showSessionExpiredAlert() {
+            if (sessionAlertShown) return;
+            sessionAlertShown = true;
+            Swal.fire({
+                title: 'Session หมดอายุ',
+                text: 'คุณไม่ได้ใช้งานระบบเป็นเวลานาน กรุณาเข้าสู่ระบบใหม่',
+                icon: 'warning',
+                confirmButtonText: 'เข้าสู่ระบบ',
+                confirmButtonColor: '#0ea5e9',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then(() => {
+                window.location.href = "{{ route('loginForm') }}";
+            });
+        }
+
+        // ชั้นที่ 1: Polling เช็ค Session ทุก 5 นาที
+        setInterval(() => {
+            fetch("{{ url('/check-session') }}")
+                .then(res => {
+                    if (res.status === 401) {
+                        showSessionExpiredAlert();
+                    }
+                })
+                .catch(() => {}); // ถ้า network error ก็ข้ามไป
+        }, 5 * 60 * 1000); // 5 นาที
+
+        // ชั้นที่ 2: ดักจับ Error 419 จาก jQuery AJAX ทุกตัว
+        $(document).ajaxError(function(event, jqXHR) {
+            if (jqXHR.status === 419) {
+                showSessionExpiredAlert();
+            }
+        });
     </script>
 
     @stack('indexScript')
