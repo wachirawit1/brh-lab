@@ -78,7 +78,7 @@ class AdminController extends Controller
             ->orWhere('fname', 'LIKE', '%' . $search . '%')
             ->orWhere('lname', 'LIKE', '%' . $search . '%')
             ->orderBy('cid', 'asc')
-            ->limit(10)
+            ->limit(50)
             ->get();
 
         // แมพ role ให้ users

@@ -83,7 +83,7 @@ class AppController extends Controller
     {
         try {
             $page = (int) $request->get('page', 1);
-            $perPage = 10;
+            $perPage = 50;
             $offset = ($page - 1) * $perPage;
 
             $start_date = (Carbon::now()->year + 543) . Carbon::now()->format('md');

@@ -8,7 +8,6 @@
                 <i class="fas fa-hospital-user text-brand-600"></i>
                 รายชื่อคนไข้
             </h4>
-            <p class="text-sm text-gray-500 mt-1">ระบบตรวจสอบผลแล็บและแจ้งเตือน</p>
         </div>
         <div class="flex gap-2">
             <button id="addBotBtn"

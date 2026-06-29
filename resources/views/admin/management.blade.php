@@ -25,16 +25,15 @@
         <!-- Header Area -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div class="flex items-center gap-4">
-                <div class="bg-brand-600 p-3 rounded-2xl shadow-lg shadow-brand-100">
-                    <i class="fa-solid fa-users-gear text-2xl text-white"></i>
+                <div class="bg-gray-100 p-3 rounded-2xl">
+                    <i class="fa-solid fa-users-gear text-2xl text-gray-700"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">User management</h1>
-                    <p class="text-gray-500 text-sm">จัดการบัญชีผู้ใช้ สิทธิ์ และการเข้าถึงระบบ</p>
                 </div>
             </div>
             <button onclick="toggleModal('addRoleModal')"
-                class="mt-4 md:mt-0 bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md flex items-center gap-2">
+                class="mt-4 md:mt-0 bg-gray-800 hover:bg-gray-900 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2">
                 <i class="fa-solid fa-plus-circle"></i> เพิ่มสิทธิ์ใหม่
             </button>
         </div>
@@ -42,8 +41,8 @@
         <!-- 📊 Stats Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-user-group"></i>
                 </div>
                 <div>
@@ -53,8 +52,8 @@
             </div>
 
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <div>
@@ -64,8 +63,8 @@
             </div>
 
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
                 <div>
@@ -75,8 +74,8 @@
             </div>
 
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <div>
@@ -86,12 +85,12 @@
             </div>
         </div>
 
-        <!-- Main Content Area (2 Columns) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Main Content Area (Full Width Stack Layout) -->
+        <div class="space-y-8">
 
-            <!-- Left Column: User Table -->
-            <div class="lg:col-span-8 bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
-                <div class="p-8 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <!-- User Table Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-8 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h2 class="text-xl font-bold text-gray-800">รายชื่อผู้ใช้เข้าระบบ</h2>
                     <div class="relative w-full sm:w-72">
                         <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -181,10 +180,8 @@
                                                 <div
                                                     class="inline-block bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all w-full max-w-md relative z-10">
                                                     <div class="p-8">
-                                                        <h3 class="text-2xl font-black text-gray-800 mb-2">
+                                                        <h3 class="text-2xl font-black text-gray-800 mb-6 pb-6 border-b border-gray-100">
                                                             แก้ไขสิทธิ์ผู้ใช้งาน</h3>
-                                                        <p class="text-gray-500 text-sm mb-6 pb-6 border-b border-gray-100">
-                                                            ระบุบทบาทที่เหมาะสมกับการปฏิบัติงานของเจ้าหน้าที่</p>
 
                                                         <div
                                                             class="flex items-center gap-4 mb-8 p-4 bg-gray-50 rounded-2xl">
@@ -261,59 +258,49 @@
                 </div>
             </div>
 
-            <!-- Right Column: Roles List -->
-            <div class="lg:col-span-4 space-y-6 font-kanit">
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
-                    <div class="p-8 border-b border-gray-50">
-                        <h2 class="text-xl font-bold text-gray-800">รายการสิทธิ์ในระบบ</h2>
-                    </div>
-                    <div class="p-4">
-                        <div class="overflow-hidden rounded-3xl border border-gray-50">
-                            <table class="min-w-full text-sm">
-                                <thead class="bg-gray-50/50">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left font-bold text-gray-400">ชื่อสิทธิ์</th>
-                                        <th class="px-4 py-4 text-center font-bold text-gray-400">ผู้ใช้งาน</th>
-                                        <th class="px-6 py-4 text-center font-bold text-gray-400">จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50">
-                                    @foreach ($roles as $role)
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <td class="px-6 py-4 font-bold text-gray-700 flex items-center gap-3">
-                                                <i class="fa-solid fa-tag text-brand-400 text-[10px]"></i>
-                                                {{ $role->name }}
-                                            </td>
-                                            <td class="px-4 py-4 text-center">
-                                                <span
-                                                    class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                                                    {{ $users->where('role_name', $role->name)->count() }} ท่าน
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 text-center">
-                                                <button
-                                                    class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all delete-role-btn"
-                                                    data-role-id="{{ $role->id }}">
-                                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <!-- Roles List Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden font-kanit">
+                <div class="p-8 border-b border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800">รายการสิทธิ์ในระบบ</h2>
                 </div>
-
-                <!-- Helper Card -->
-                <div
-                    class="bg-gradient-to-br from-brand-600 to-brand-800 rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-100 relative overflow-hidden">
-                    <i class="fa-solid fa-shield-halved absolute -right-4 -bottom-4 text-8xl text-white/10 rotate-12"></i>
-                    <h4 class="text-lg font-bold mb-2">คำแนะนำเพิ่มเติม</h4>
-                    <p class="text-white/80 text-xs leading-relaxed">การกำหนดสิทธิ์ช่วยควบคุมการเข้าถึงข้อมูลผลแล็บคนคนไข้
-                        กรุณาตรวจสอบให้แน่ใจก่อนมอบสิทธิ์ Admin ให้กับผู้ใช้รายใด</p>
+                <div class="p-6">
+                    <div class="overflow-hidden rounded-2xl border border-gray-100">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-50/50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left font-bold text-gray-400">ชื่อสิทธิ์</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-400">ผู้ใช้งาน</th>
+                                    <th class="px-6 py-4 text-center font-bold text-gray-400">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                @foreach ($roles as $role)
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 font-bold text-gray-700 flex items-center gap-3">
+                                            <i class="fa-solid fa-tag text-brand-400 text-[10px]"></i>
+                                            {{ $role->name }}
+                                        </td>
+                                        <td class="px-4 py-4 text-center">
+                                            <span
+                                                class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                                {{ $users->where('role_name', $role->name)->count() }} ท่าน
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <button
+                                                class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all delete-role-btn"
+                                                data-role-id="{{ $role->id }}">
+                                                <i class="fa-solid fa-trash-can text-xs"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 

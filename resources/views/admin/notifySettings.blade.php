@@ -12,7 +12,7 @@
         <!-- Breadcrumb -->
         <nav class="flex mb-4 text-xs text-gray-400 font-kanit" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a href="/" class="hover:text-brand-600">หน้าแรก</a></li>
+                <li><a href="/" class="hover:text-gray-600">หน้าแรก</a></li>
                 <li class="flex items-center">
                     <i class="fa-solid fa-chevron-right mx-2 text-[8px]"></i>
                     <span class="text-gray-500">จัดการแจ้งเตือน Telegram</span>
@@ -23,12 +23,11 @@
         <!-- Header Area -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 font-kanit">
             <div class="flex items-center gap-4">
-                <div class="bg-brand-600 p-3 rounded-2xl shadow-lg shadow-brand-100">
-                    <i class="fa-solid fa-bell-circle-check text-2xl text-white"></i>
+                <div class="bg-gray-100 p-3 rounded-2xl">
+                    <i class="fa-solid fa-bell-circle-check text-2xl text-gray-700"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Notification Management</h1>
-                    <p class="text-gray-500 text-sm">จัดการผู้รับแจ้งเตือนผ่าน Telegram Bot</p>
                 </div>
             </div>
             <div
@@ -46,8 +45,8 @@
         <!-- 📊 Stats Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 font-kanit">
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <div>
@@ -57,8 +56,8 @@
             </div>
 
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-square-check"></i>
                 </div>
                 <div>
@@ -68,8 +67,8 @@
             </div>
 
             <div
-                class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-2xl">
+                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
+                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
                     <i class="fa-solid fa-bell-slash"></i>
                 </div>
                 <div>
@@ -79,11 +78,11 @@
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start font-kanit">
-            <!-- Left: Table (8/12) -->
-            <div class="lg:col-span-8 bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
-                <div class="p-8 border-b border-gray-50">
+        <!-- Main Content Area (Full Width Layout) -->
+        <div class="space-y-8 font-kanit">
+            <!-- Table Card -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-8 border-b border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800">รายชื่อผู้ลงทะเบียนรับแจ้งเตือน</h2>
                 </div>
 
@@ -109,10 +108,10 @@
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 @foreach ($subscribers as $subscriber)
-                                    <tr id="row_{{ $subscriber->id }}" class="hover:bg-brand-50/30 transition-colors">
+                                    <tr id="row_{{ $subscriber->id }}" class="hover:bg-gray-50/50 transition-colors">
                                         <td class="px-8 py-5 flex items-center gap-4">
                                             <div
-                                                class="h-10 w-10 flex-shrink-0 rounded-xl bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200 uppercase">
+                                                class="h-10 w-10 flex-shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 font-bold border border-gray-200 uppercase">
                                                 {{ mb_substr($subscriber->fullName, 0, 1) }}
                                             </div>
                                             <div>
@@ -164,52 +163,6 @@
                             </tbody>
                         </table>
                     @endif
-                </div>
-            </div>
-
-            <!-- Right: Guide (4/12) -->
-            <div class="lg:col-span-4 space-y-6">
-                <!-- Instruction Card -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-50 p-8">
-                    <h3 class="text-xl font-black text-gray-800 mb-4">การทำงานของ Bot</h3>
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div
-                                class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                1</div>
-                            <p class="text-xs text-gray-500 leading-relaxed">ผู้ใช้ต้องแสกน QR Code
-                                จากหน้าหลักเพื่อเริ่มการทำงานของ Telegram Bot</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <div
-                                class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                2</div>
-                            <p class="text-xs text-gray-500 leading-relaxed">เมื่อกด Start ระบบจะผูกรหัสพนักงานเข้ากับ Chat
-                                ID โดยอัตโนมัติ</p>
-                        </div>
-                        <div class="flex gap-4">
-                            <div
-                                class="w-8 h-8 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                3</div>
-                            <p class="text-xs text-gray-500 leading-relaxed">Admin สามารถควบคุมการ "ปิด" หรือ "เปิด"
-                                การแจ้งเตือนรายบุคคลได้จากหน้านี้</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bot Status Card -->
-                <div
-                    class="bg-gradient-to-br from-brand-600 to-brand-800 rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-100 relative overflow-hidden">
-                    <i class="fa-brands fa-telegram absolute -right-6 -bottom-6 text-9xl text-white/10 -rotate-12"></i>
-                    <h4 class="text-lg font-bold mb-2">Telegram API</h4>
-                    <p class="text-white/80 text-[10px] leading-relaxed uppercase tracking-widest font-bold">Secure Delivery
-                        Service</p>
-                    <div class="mt-4 pt-4 border-t border-white/10">
-                        <div class="flex justify-between items-center text-[10px] font-bold">
-                            <span>Messages Today:</span>
-                            <span class="bg-white/20 px-2 py-0.5 rounded">Real-time</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
