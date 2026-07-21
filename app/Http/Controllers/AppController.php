@@ -323,4 +323,22 @@ class AppController extends Controller
             ], 500);
         }
     }
+
+    public function createAllergy(Request $request, $hn)
+    {
+        $name = $request->query('name', '-');
+        return view('patients.allergy', compact('hn', 'name'));
+    }
+
+    public function storeAllergy(Request $request, $hn)
+    {
+        $drugName = $request->input('drug_name');
+        $symptoms = $request->input('symptoms');
+        $severity = $request->input('severity');
+
+        // ในอนาคตสามารถบันทึกข้อมูลลง Database ได้ที่นี่ เช่น:
+        // DB::table('drug_allergies')->insert([...]);
+
+        return redirect()->route('index')->with('success', "บันทึกข้อมูลการแพ้ยาสำเร็จสำหรับ HN: {$hn} (ยา: {$drugName})");
+    }
 }

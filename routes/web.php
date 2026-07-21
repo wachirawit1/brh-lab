@@ -43,6 +43,10 @@ Route::middleware(['logged.in', 'check.session'])->group(function () {
     Route::get('/lab-results/{hn}', [AppController::class, 'getLabResults']);
     Route::post('/notify', [TelegramController::class, 'notify'])->name('notify');
     Route::post('/telegram/send', [TelegramController::class, 'send'])->name('test.telegram.send');
+    
+    // จัดการข้อมูลการแพ้ยา
+    Route::get('/patients/{hn}/allergy', [AppController::class, 'createAllergy'])->name('patients.allergy.create');
+    Route::post('/patients/{hn}/allergy', [AppController::class, 'storeAllergy'])->name('patients.allergy.store');
 });
 
 Route::get('/telegram/updates', [TelegramController::class, 'getUpdates'])->name('get.chatids');

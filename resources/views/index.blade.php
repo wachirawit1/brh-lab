@@ -1,6 +1,13 @@
 @extends('layout.app')
 @section('title', 'รายชื่อผู้ป่วย')
 @section('content')
+    @if (session('success'))
+        <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3.5 rounded-lg flex items-center gap-3 shadow-sm">
+            <i class="fas fa-check-circle text-emerald-500 text-lg"></i>
+            <span class="text-sm font-medium">{{ session('success') }}</span>
+        </div>
+    @endif
+
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
@@ -118,11 +125,14 @@
 
     <!-- Context Menu -->
     <div id="contextMenu" class="fixed z-50 bg-white shadow-xl rounded-lg border border-gray-100 py-1 w-48 hidden">
+        <button id="addAllergy"
+            class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition flex items-center gap-2">
+            <i class="fas fa-pills w-5 text-center text-red-500"></i> เพิ่มข้อมูลแพ้ยา
+        </button>
         <button id="viewResult"
             class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition flex items-center gap-2">
             <i class="fas fa-microscope w-5 text-center"></i> ดูผลแล็บ
         </button>
-        <!-- Add more menu items here -->
     </div>
 
 
@@ -337,6 +347,19 @@
 
                 // Close Menu
                 contextMenu.classList.add("hidden");
+            }
+        });
+        // Add Allergy JS (Redirect to new page)
+        document.getElementById("addAllergy").addEventListener("click", function() {
+            if (selectedHN && selectedRow) {
+                const hn = selectedRow.dataset.hn;
+                const fullname = selectedRow.dataset.name;
+
+                // Close Menu
+                contextMenu.classList.add("hidden");
+
+                // Redirect to new page with HN and Name as parameters
+                window.location.href = `/patients/${hn}/allergy?name=${encodeURIComponent(fullname)}`;
             }
         });
 
