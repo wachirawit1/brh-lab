@@ -1,12 +1,7 @@
 @extends('layout.app')
 @section('title', 'รายชื่อผู้ป่วย')
 @section('content')
-    @if (session('success'))
-        <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3.5 rounded-lg flex items-center gap-3 shadow-sm">
-            <i class="fas fa-check-circle text-emerald-500 text-lg"></i>
-            <span class="text-sm font-medium">{{ session('success') }}</span>
-        </div>
-    @endif
+
 
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
