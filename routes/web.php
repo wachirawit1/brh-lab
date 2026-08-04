@@ -10,9 +10,6 @@ Route::get('/', function () {
     return redirect()->route('index');
 });
 
-Route::fallback(function () {
-    return abort(404);
-});
 
 Route::middleware(['guest.custom'])->group(function () {
     Route::get('/login', [AuthController::class, 'loginForm'])->name('loginForm');
@@ -50,6 +47,9 @@ Route::middleware(['logged.in', 'check.session'])->group(function () {
 });
 
 Route::get('/telegram/updates', [TelegramController::class, 'getUpdates'])->name('get.chatids');
+Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook'])->name('telegram.webhook');
+Route::get('/telegram/set-webhook', [TelegramController::class, 'setWebhook'])->name('telegram.setWebhook');
+Route::get('/telegram/webhook-info', [TelegramController::class, 'getWebhookInfo'])->name('telegram.webhookInfo');
 // Route::put('/telegram/chats/{chatId}/deactivate', [TelegramController::class, 'deactivateChat']);
 // Route::get('/telegram/chats', [TelegramController::class, 'getAllChats']);
 
@@ -68,4 +68,8 @@ Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function ()
     Route::delete('/admin/roles/destroy/{id}', [AdminController::class, 'destroyRole'])->name('admin.roles.destroy');
 
     Route::delete('/admin/notify-management/destroy/{id}', [AdminController::class, 'destroyNotify'])->name('admin.deleteNotificationSubscriber');
+});
+
+Route::fallback(function () {
+    return abort(404);
 });

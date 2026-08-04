@@ -183,23 +183,6 @@
             @endif
         });
 
-        // Polling for Telegram Chat IDs
-        setInterval(() => {
-            fetch("{{ route('get.chatids') }}")
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.new > 0) {
-                        Swal.fire({
-                            title: 'พบผู้ใช้ใหม่!',
-                            text: `พบผู้ใช้ใหม่ ${data.new} คน\nChat ID: ${data.saved.map(c => c.chat_id).join(", ")}`,
-                            icon: 'info',
-                            confirmButtonText: 'รับทราบ',
-                            confirmButtonColor: '#0ea5e9'
-                        });
-                    }
-                })
-                .catch(err => console.error("Fetch error:", err));
-        }, 10000);
 
         // ===== SESSION GUARD =====
         let sessionAlertShown = false; // กันไม่ให้ Alert ขึ้นซ้ำ

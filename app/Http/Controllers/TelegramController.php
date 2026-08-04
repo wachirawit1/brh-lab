@@ -273,4 +273,118 @@ class TelegramController extends Controller
             ]);
         }
     }
+
+    /**
+     * รับข้อมูล Webhook จาก Telegram
+     */
+    public function handleWebhook(Request $request)
+    {
+        $update = $request->all();
+        Log::info('Telegram Webhook received:', $update);
+
+        if (isset($update['message']['chat']['id'])) {
+            try {
+                $chatData = $this->prepareChatData($update);
+                $chatId = $chatData['chat_id'];
+
+                $existingChat = DB::connection('mysql')->table('telegram_subscribers')->where('chat_id', $chatId)->first();
+
+                if ($existingChat) {
+                    DB::connection('mysql')->table('telegram_subscribers')
+                        ->where('chat_id', $chatId)
+                        ->update($chatData);
+                } else {
+                    DB::connection('mysql')->table('telegram_subscribers')->insert($chatData);
+                }
+            } catch (\Exception $e) {
+                Log::error('Telegram Webhook DB Error: ' . $e->getMessage());
+            }
+        }
+
+        return response()->json(['status' => 'ok'], 200);
+    }
+
+    /**
+     * ตั้งค่า Webhook กับทาง Telegram API
+     */
+    public function setWebhook(Request $request)
+    {
+        $botToken = config('services.telegram.bot_token') ?? env('TELEGRAM_BOT_TOKEN');
+        $webhookUrl = $request->input('url', url('/telegram/webhook'));
+
+        if (!str_starts_with($webhookUrl, 'https://')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Webhook URL ต้องเป็น HTTPS เท่านั้น เช่น https://192.168.95.80:8443/telegram/webhook'
+            ], 400);
+        }
+
+        $certPath = base_path('telegram_cert.cer');
+        if (!file_exists($certPath)) {
+            $certPath = base_path('telegram_cert.pem');
+        }
+
+        $url = "https://api.telegram.org/bot{$botToken}/setWebhook";
+
+        $postData = [
+            'url' => $webhookUrl
+        ];
+
+        if (file_exists($certPath)) {
+            $postData['certificate'] = new \CURLFile(realpath($certPath));
+        }
+
+        try {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            return response()->json([
+                'http_code' => $httpCode,
+                'telegram_response' => json_decode($response, true)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ตรวจสอบสถานะการเชื่อมต่อ Webhook จาก Telegram API
+     */
+    public function getWebhookInfo()
+    {
+        $botToken = config('services.telegram.bot_token') ?? env('TELEGRAM_BOT_TOKEN');
+        $url = "https://api.telegram.org/bot{$botToken}/getWebhookInfo";
+
+        try {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            return response()->json([
+                'http_code' => $httpCode,
+                'telegram_response' => json_decode($response, true)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
