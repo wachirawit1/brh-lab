@@ -120,7 +120,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
         <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
-            © {{ date('Y') }} ระบบแจ้งเตือนผลแล็บ — เวอร์ชัน {{ env('APP_VERSION', '1.0.0') }}
+            © {{ date('Y') }} ระบบแจ้งเตือนผลแล็บ — เวอร์ชัน {{ env('APP_VERSION', '1.1.0') }} (ปล่อยวันที่ {{ env('APP_RELEASE_DATE', '05/08/2026') }})
             <br>
             พัฒนาโดย <span class="text-brand-600">นาย วชิรวิทย์ กุลสุทธิชัย</span>
         </div>

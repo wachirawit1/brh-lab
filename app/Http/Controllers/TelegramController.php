@@ -191,6 +191,10 @@ class TelegramController extends Controller
             $data['pm'] = $username;
         }
 
+        // เพิ่ม created_at เฉพาะตอน insert
+        if (!DB::table('telegram_subscribers')->where('chat_id', $chat['id'])->exists()) {
+            $data['created_at'] = now();
+        }
 
         return $data;
     }
