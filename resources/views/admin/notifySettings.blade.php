@@ -247,9 +247,10 @@
                     if (result.isConfirmed) {
                         $.ajax({
                             url: '{{ url('admin/notify-management/destroy') }}/' + id,
-                            method: 'DELETE',
+                            method: 'POST',
                             data: {
-                                _token: '{{ csrf_token() }}'
+                                _token: '{{ csrf_token() }}',
+                                _method: 'DELETE'
                             },
                             success: function(response) {
                                 if (response.success) {
