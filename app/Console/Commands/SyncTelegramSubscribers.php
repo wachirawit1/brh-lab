@@ -38,7 +38,9 @@ class SyncTelegramSubscribers extends Command
                 $this->info("Sync completed: {$newCount} new, {$updatedCount} updated.");
                 Log::info("Telegram Sync Command: {$newCount} new, {$updatedCount} updated.");
             } else {
-                $this->error("Sync failed: " . ($data['error'] ?? 'Unknown error'));
+                $errorMsg = $data['error'] ?? 'Unknown error or empty response';
+                $this->error("Sync failed: " . $errorMsg);
+                Log::warning("Telegram Sync Failed: " . $errorMsg . " | Raw: " . $response->getContent());
             }
         } catch (\Exception $e) {
             $this->error("Error executing Telegram sync: " . $e->getMessage());
