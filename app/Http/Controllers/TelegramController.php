@@ -280,6 +280,10 @@ class TelegramController extends Controller
     public function handleWebhook(Request $request)
     {
         $update = $request->all();
+        if (empty($update)) {
+            $update = json_decode($request->getContent(), true) ?? [];
+        }
+
         Log::info('Telegram Webhook received:', $update);
 
         if (isset($update['message']['chat']['id'])) {
