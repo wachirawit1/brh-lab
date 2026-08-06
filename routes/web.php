@@ -50,8 +50,6 @@ Route::get('/telegram/updates', [TelegramController::class, 'getUpdates'])->name
 Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook'])->name('telegram.webhook');
 Route::get('/telegram/set-webhook', [TelegramController::class, 'setWebhook'])->name('telegram.setWebhook');
 Route::get('/telegram/webhook-info', [TelegramController::class, 'getWebhookInfo'])->name('telegram.webhookInfo');
-// Route::put('/telegram/chats/{chatId}/deactivate', [TelegramController::class, 'deactivateChat']);
-// Route::get('/telegram/chats', [TelegramController::class, 'getAllChats']);
 
 // Admin routes
 Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function () {

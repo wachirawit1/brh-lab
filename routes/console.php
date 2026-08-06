@@ -10,18 +10,11 @@ use Illuminate\Support\Facades\Log;
 use App\Jobs\NotifyLabResults;
 
 Schedule::job(new NotifyLabResults)
-    ->hourly() // เปลี่ยนเป็นรายชั่วโมงตามที่ต้องการ
+    ->hourly()
     ->withoutOverlapping()
-    // ->onFailure(function ($e) {
-    //     Log::error('Notification job failed: ' . $e->getMessage());
-    // })
     ->name('notify_lab_results');
 
-use App\Jobs\SyncTelegramUsers;
-
-Schedule::job(new SyncTelegramUsers)
+Schedule::command('telegram:sync')
     ->everyMinute()
     ->withoutOverlapping()
     ->name('sync_telegram_users');
-
-// ->withoutOverlapping();
