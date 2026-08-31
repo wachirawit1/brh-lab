@@ -39,4 +39,8 @@ return [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
     ],
 
+    'lab_notifications' => [
+        'enabled' => filter_var(env('LAB_NOTIFICATION_ENABLED', false), FILTER_VALIDATE_BOOL),
+    ],
+
 ];

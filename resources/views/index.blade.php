@@ -124,51 +124,17 @@
             class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition flex items-center gap-2">
             <i class="fas fa-pills w-5 text-center text-red-500"></i> เพิ่มข้อมูลแพ้ยา
         </button>
+        <button id="addOrganism"
+            class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition flex items-center gap-2">
+            <i class="fa-solid fa-bacterium w-5 text-center text-teal-600"></i> เติมเชื้อ
+        </button>
         <button id="viewResult"
             class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-brand-600 transition flex items-center gap-2">
-            <i class="fas fa-microscope w-5 text-center"></i> ดูผลแล็บ
+            <i class="fas fa-microscope w-5 text-center text-brand-600"></i> ดูผลแล็บ
         </button>
     </div>
 
 
-    <!-- Floating Chat Button -->
-    <button id="chatButton"
-        class="fixed bottom-6 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg hover:bg-brand-700 flex items-center justify-center transition z-40">
-        <i class="fa-solid fa-message text-xl"></i>
-    </button>
-
-    <!-- Chat Box -->
-    <div id="chatBox"
-        class="fixed bottom-24 right-6 w-80 bg-white shadow-2xl rounded-xl border border-gray-200 hidden z-40 overflow-hidden">
-        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-            <h5 class="font-medium text-gray-800">ส่งข้อความทดสอบ</h5>
-            <button type="button" id="closeChat" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="p-4 space-y-4">
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">ผู้รับ</label>
-                <select id="chatUser"
-                    class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border">
-                    <option value="">-- เลือกผู้รับ --</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->chat_id }}">{{ $user->pm }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">ข้อความ</label>
-                <textarea id="chatMessage" rows="3"
-                    class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border"
-                    placeholder="พิมพ์ข้อความ..."></textarea>
-            </div>
-            <button id="sendBtn"
-                class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition text-sm font-medium">
-                ส่งข้อความ
-            </button>
-        </div>
-    </div>
 
     <!-- Lab Modal (Tailwind) -->
     <div id="labModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
@@ -264,9 +230,11 @@
         // Use Global toggleModal
         window.toggleModal = function(modalID) {
             const modal = document.getElementById(modalID);
-            if (modal) {
-                modal.classList.toggle('hidden');
-            }
+            if (!modal) return;
+
+            const opening = modal.classList.contains('hidden');
+            modal.classList.toggle('hidden', !opening);
+            window.BRHModalScroll?.set(`dom-modal:${modalID}`, opening);
         }
 
         // Context Menu Logic
@@ -358,6 +326,149 @@
             }
         });
 
+        // Add Organism JS (SweetAlert Form)
+        const addOrganismBtn = document.getElementById("addOrganism");
+        if (addOrganismBtn) {
+            addOrganismBtn.addEventListener("click", async function() {
+                if (selectedHN && selectedRow) {
+                    const hn = selectedRow.dataset.hn;
+                    const fullname = selectedRow.dataset.name || 'ไม่ระบุชื่อ';
+
+                    // Close Menu
+                    contextMenu.classList.add("hidden");
+
+                    Swal.fire({
+                        title: 'กำลังโหลดข้อมูล...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    let currentData = {
+                        organisms: [],
+                        master_organisms: [],
+                        updated_at: null,
+                        created_by: null
+                    };
+
+                    try {
+                        const res = await fetch(`/amr/organisms/${encodeURIComponent(hn)}`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        if (res.ok) {
+                            const json = await res.json();
+                            if (json.status === 'success' && json.data) {
+                                currentData = Object.assign(currentData, json.data);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Could not fetch organism data:', e);
+                    }
+
+                    Swal.fire({
+                        title: 'เติมข้อมูลเชื้อดื้อยา (AMR)',
+                        width: '760px',
+                        html: `
+                            <div class="text-left text-sm space-y-4 pt-1">
+                                <div class="bg-sky-50/80 border border-sky-100 p-3 rounded-xl flex items-center justify-between">
+                                    <div>
+                                        <p class="text-[11px] text-sky-600 font-semibold uppercase tracking-wider">ผู้ป่วย</p>
+                                        <p class="font-bold text-gray-900 text-sm">${fullname}</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">HN: <span class="font-semibold text-gray-700">${hn}</span></p>
+                                    </div>
+                                    <div class="h-9 w-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-base">
+                                        <i class="fa-solid fa-bacterium"></i>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                                        <span>เลือกเชื้อที่ตรวจพบ (${currentData.master_organisms.length} กลุ่มเฝ้าระวัง)</span>
+                                        <span class="text-[11px] font-normal text-gray-400">ติ๊กได้มากกว่า 1 ตัว</span>
+                                    </p>
+
+                                    <div data-amr-organism-grid class="grid max-h-[50vh] grid-cols-1 gap-2 overflow-y-auto pr-1 text-left sm:grid-cols-2">
+                                        ${window.buildAmrOrganismOptions(currentData.master_organisms, currentData.organisms, 'idx_org')}
+                                    </div>
+                                </div>
+
+                                <div class="pt-2.5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                                    ${currentData.updated_at ? `
+                                        <div class="flex items-center gap-1.5 text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200/60 font-medium">
+                                            <i class="fa-solid fa-user-pen text-teal-600"></i>
+                                            <span>เพิ่มโดย: <strong class="text-teal-900 font-bold">${escapeHtml(currentData.created_by || 'ไม่ระบุ')}</strong></span>
+                                        </div>
+                                        <div class="text-gray-500 flex items-center gap-1">
+                                            <i class="fa-regular fa-clock text-gray-400"></i>
+                                            <span>เมื่อ: ${escapeHtml(currentData.updated_at)}</span>
+                                        </div>
+                                    ` : `
+                                        <div class="text-gray-400 flex items-center gap-1">
+                                            <i class="fa-solid fa-circle-info"></i>
+                                            <span>ยังไม่มีประวัติการบันทึกเชื้อ</span>
+                                        </div>
+                                        <div class="text-gray-600 flex items-center gap-1 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200">
+                                            <i class="fa-solid fa-user text-gray-400"></i>
+                                            <span>ผู้บันทึก: <strong class="text-gray-800 font-semibold">{{ session('user.fullname') ?: (session('user.username') ?: 'เจ้าหน้าที่') }}</strong></span>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fa-solid fa-check mr-1.5"></i> บันทึกข้อมูล',
+                        cancelButtonText: 'ยกเลิก',
+                        confirmButtonColor: 'var(--brand-solid)',
+                        cancelButtonColor: 'var(--neutral-solid)',
+                        focusConfirm: false,
+                        showLoaderOnConfirm: true,
+                        preConfirm: async () => {
+                            const payload = {
+                                hn: hn,
+                                organisms: window.getSelectedAmrOrganisms(Swal.getHtmlContainer())
+                            };
+
+                            try {
+                                const response = await fetch('/amr/organisms', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify(payload)
+                                });
+
+                                if (!response.ok) {
+                                    const errJson = await response.json();
+                                    throw new Error(errJson.message || 'บันทึกไม่สำเร็จ');
+                                }
+
+                                return await response.json();
+                            } catch (err) {
+                                Swal.showValidationMessage(`เกิดข้อผิดพลาด: ${err.message}`);
+                                return false;
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'บันทึกสำเร็จ',
+                                text: `บันทึกข้อมูลเชื้อสำหรับ HN: ${hn} เรียบร้อยแล้ว`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
         function fetchLabResults(hn) {
             fetch(`/lab-results/${hn}`, {
                     method: "GET",
@@ -381,6 +492,12 @@
 
         function displayLabResults(labResults) {
             const container = document.getElementById("lab-results-container");
+
+            const escapeHtml = (value) => {
+                const element = document.createElement('div');
+                element.textContent = value == null ? '' : String(value);
+                return element.innerHTML;
+            };
 
             if (!labResults || labResults.length === 0) {
                 container.innerHTML = `
@@ -412,13 +529,13 @@
                         <div class="flex items-center gap-3">
                              <span class="bg-white border border-gray-200 text-gray-500 text-xs w-6 h-6 flex items-center justify-center rounded-full">${index + 1}</span>
                              <div class="text-sm font-medium text-gray-700">
-                                <i class="fas fa-calendar-alt text-gray-400 mr-1"></i> ${lab.res_date}
+                                <i class="fas fa-calendar-alt text-gray-400 mr-1"></i> ${escapeHtml(lab.res_date)}
                             </div>
                         </div>
                         <i class="fas ${icon} text-gray-400 text-xs transition-transform transform"></i>
                     </button>
                     <div id="${id}" class="${isOpen} px-4 py-3 bg-white border-t border-gray-200">
-                        <pre class="bg-gray-50 p-4 rounded-md text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed shadow-inner border border-gray-100">${lab.resText}</pre>
+                        <pre class="bg-gray-50 p-4 rounded-md text-sm text-gray-800 font-mono whitespace-pre-wrap leading-relaxed shadow-inner border border-gray-100">${escapeHtml(lab.resText)}</pre>
                     </div>
                 </div>`;
             });
@@ -444,7 +561,7 @@
 
         document.getElementById('addBotBtn').addEventListener('click', function() {
             const botUsername = 'brh_test_bot';
-            const startParam = "{{ session('user.username') }}";
+            const startParam = @json(session('user.username'));
             window.open(`https://t.me/${botUsername}?start=${startParam}`, '_blank');
             alert("กรุณากด Start ใน Telegram Bot เพื่อเปิดการแจ้งเตือน");
             this.classList.add('opacity-50', 'cursor-not-allowed');
@@ -553,37 +670,5 @@
             });
         });
 
-        // Chat Toggle
-        document.getElementById('chatButton').addEventListener('click', function() {
-            const box = document.getElementById('chatBox');
-            box.classList.toggle('hidden');
-        });
-        document.getElementById('closeChat').addEventListener('click', function() {
-            document.getElementById('chatBox').classList.add('hidden');
-        });
-
-        document.getElementById('sendBtn').addEventListener('click', async function() {
-            const chatUser = document.getElementById('chatUser').value;
-            const chatMessage = document.getElementById('chatMessage').value;
-            if (!chatUser || !chatMessage.trim()) return alert('กรุณาระบุข้อมูลให้ครบ');
-
-            // ... fetch logic ...
-            const res = await fetch('/telegram/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    chat_id: chatUser,
-                    message: chatMessage
-                })
-            });
-            const data = await res.json();
-            if (data.status === 'ok') {
-                alert('ส่งข้อความสำเร็จ');
-                document.getElementById('chatMessage').value = '';
-            } else alert('ส่งไม่สำเร็จ');
-        });
     </script>
 @endpush

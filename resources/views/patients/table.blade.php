@@ -21,7 +21,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $patient->hn }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $patient->name ?? '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $patient->ward_name ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{!! $patient->after_ward ?? '-' !!}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $patient->after_ward ?? '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-600 font-medium">
                         {{ $patient->lab_name ?? '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

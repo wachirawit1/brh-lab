@@ -255,11 +255,6 @@ class AppController extends Controller
                     ->get();
             });
 
-            $users = DB::connection('mysql')
-                ->table('telegram_subscribers')
-                ->where('is_active', 1)
-                ->where('allowed', 1)
-                ->get();
 
             if ($request->ajax()) {
                 $tableHtml = view('patients.table', compact('patients'))->render();
@@ -275,7 +270,7 @@ class AppController extends Controller
             $bot_username = 'brh_test_bot';
             $qr = QrCode::size(300)->generate('https://t.me/' . $bot_username . '?start=' . session('user.username'));
 
-            return view('index', compact('patients', 'telegram_status', 'telegram_allowed', 'qr', 'wards', 'users'));
+            return view('index', compact('patients', 'telegram_status', 'telegram_allowed', 'qr', 'wards'));
         } catch (\Exception $e) {
             Log::error('Search Error: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
@@ -294,20 +289,30 @@ class AppController extends Controller
     public function getLabResults($hn)
     {
         try {
+            $rawHn = (string) $hn;
+            $trimmedHn = trim($rawHn);
+            // เติมช่องว่างด้านหน้าให้ครบ 7 ตัวอักษร (ตามมาตรฐานฐานข้อมูล รพ.)
+            $paddedHn = str_pad($trimmedHn, 7, ' ', STR_PAD_LEFT);
+
+            Log::info("Fetching Lab Results for HN: [{$trimmedHn}], Padded: [{$paddedHn}]");
+
             $labResults = DB::connection('sqlsrv')
                 ->table('Labres_m')
                 ->select('res_date', 'resText')
-                ->where('hn', $hn)
+                ->where(function ($query) use ($trimmedHn, $paddedHn) {
+                    $query->where('hn', $paddedHn)
+                          ->orWhere('hn', $trimmedHn);
+                })
                 ->orderBy('res_date', 'desc')
-                ->limit(10) // จำกัดผลลัพธ์
                 ->get()
                 ->map(function ($lab) {
                     return [
                         'res_date' => DateHelper::formatThaiDateTime($lab->res_date, 'full'),
                         'resText' => $lab->resText,
-
                     ];
                 });
+
+            Log::info("Found " . count($labResults) . " lab results for HN: {$trimmedHn}");
 
             return response()->json([
                 'labResults' => $labResults,

@@ -1,22 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AppController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AmrController;
+use App\Http\Controllers\AppController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TelegramController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('index');
+    return redirect()->route('amr.index');
 });
-
 
 Route::middleware(['guest.custom'])->group(function () {
     Route::get('/login', [AuthController::class, 'loginForm'])->name('loginForm');
 });
 
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // เช็คสถานะ Session (ใช้โดย JavaScript Polling)
 Route::get('/check-session', function () {
@@ -26,33 +28,46 @@ Route::get('/check-session', function () {
         if ($lastActivity && now()->diffInMinutes($lastActivity) > 60) {
             session()->forget('user'); // เคลียร์ session
             \Illuminate\Support\Facades\Auth::logout();
+
             return response()->json(['alive' => false, 'message' => 'Session Expired'], 401);
         }
 
         return response()->json(['alive' => true]);
     }
+
     return response()->json(['alive' => false], 401);
 })->name('session.ping');
 
 // ฝั่ง User ทั่วไป
 Route::middleware(['logged.in', 'check.session'])->group(function () {
-    Route::get('/index', [AppController::class, 'index'])->name('index');
+    Route::get('/index', function () {
+        return redirect()->route('amr.index');
+    })->name('index');
+    Route::get('/amr', [AmrController::class, 'index'])->name('amr.index');
     Route::get('/lab-results/{hn}', [AppController::class, 'getLabResults']);
-    Route::post('/notify', [TelegramController::class, 'notify'])->name('notify');
-    Route::post('/telegram/send', [TelegramController::class, 'send'])->name('test.telegram.send');
-    
+
+    // QR Code รับแจ้งเตือน Telegram
+    Route::get('/telegram/qr-data', [TelegramController::class, 'getQrData'])->name('telegram.qr');
+
     // จัดการข้อมูลการแพ้ยา
     Route::get('/patients/{hn}/allergy', [AppController::class, 'createAllergy'])->name('patients.allergy.create');
     Route::post('/patients/{hn}/allergy', [AppController::class, 'storeAllergy'])->name('patients.allergy.store');
-});
 
-Route::get('/telegram/updates', [TelegramController::class, 'getUpdates'])->name('get.chatids');
-Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook'])->name('telegram.webhook');
-Route::get('/telegram/set-webhook', [TelegramController::class, 'setWebhook'])->name('telegram.setWebhook');
-Route::get('/telegram/webhook-info', [TelegramController::class, 'getWebhookInfo'])->name('telegram.webhookInfo');
+    // จัดการข้อมูลเชื้อดื้อยา AMR
+    Route::get('/amr/organisms/{hn}', [AmrController::class, 'getOrganisms'])->name('amr.organisms.get');
+    Route::post('/amr/organisms', [AmrController::class, 'storeOrganisms'])->name('amr.organisms.store');
+
+    // Settings Hub: Master Data & Audit Logs
+    Route::get('/settings/master-organisms', [AmrController::class, 'getMasterOrganisms'])->name('settings.organisms.index');
+    Route::post('/settings/master-organisms', [AmrController::class, 'storeMasterOrganism'])->name('settings.organisms.store');
+    Route::patch('/settings/master-organisms/reorder', [AmrController::class, 'reorderMasterOrganisms'])->name('settings.organisms.reorder');
+    Route::patch('/settings/master-organisms/{id}/toggle', [AmrController::class, 'toggleMasterOrganism'])->name('settings.organisms.toggle');
+    Route::get('/settings/audit-logs', [AmrController::class, 'getAuditLogs'])->name('settings.audit.logs');
+});
 
 // Admin routes
 Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function () {
+    Route::post('/notify', [TelegramController::class, 'notify'])->name('notify');
     Route::get('/admin/notify-management', [AdminController::class, 'notificationSettings'])->name('admin.notifySettings');
     Route::post('/admin/notify-management/update', [AdminController::class, 'updateNotificationStatus'])->name('admin.updateNotificationStatus');
 

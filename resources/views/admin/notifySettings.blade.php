@@ -10,150 +10,141 @@
 
     <div class="px-2 md:px-6">
         <!-- Breadcrumb -->
-        <nav class="flex mb-4 text-xs text-gray-400 font-kanit" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li><a href="/" class="hover:text-gray-600">หน้าแรก</a></li>
+        <nav class="flex mb-4 text-xs text-gray-500" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                <li><a href="{{ route('amr.index') }}" class="hover:text-brand-600 font-medium">หน้าแรก</a></li>
                 <li class="flex items-center">
-                    <i class="fa-solid fa-chevron-right mx-2 text-[8px]"></i>
-                    <span class="text-gray-500">จัดการแจ้งเตือน Telegram</span>
+                    <i class="fa-solid fa-chevron-right mx-1.5 text-xs text-gray-400"></i>
+                    <span class="text-gray-700 font-semibold">จัดการแจ้งเตือน Telegram</span>
                 </li>
             </ol>
         </nav>
 
         <!-- Header Area -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 font-kanit">
-            <div class="flex items-center gap-4">
-                <div class="bg-gray-100 p-3 rounded-2xl">
-                    <i class="fa-solid fa-bell-circle-check text-2xl text-gray-700"></i>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="h-11 w-11 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center text-xl shadow-2xs">
+                    <i class="fa-solid fa-bell-circle-check"></i>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Notification Management</h1>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">การจัดการแจ้งเตือน (Notification Management)</h1>
+                    <p class="text-xs text-gray-500 mt-0.5">ตรวจสอบและควบคุมสถานะการรับแจ้งเตือนผลแล็บผ่าน Telegram Bot</p>
                 </div>
             </div>
-            <div
-                class="mt-4 md:mt-0 bg-white px-5 py-2.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3">
-                <span class="flex h-3 w-3 relative">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            <div class="bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-2xs flex items-center gap-2.5">
+                <span class="flex h-2.5 w-2.5 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </span>
-                <span class="text-sm font-bold text-gray-600">Bot Connection: <span
-                        class="text-emerald-600 uppercase">Active</span></span>
+                <span class="text-xs font-bold text-gray-700">Bot Connection: <span class="text-emerald-700 uppercase font-black">Active</span></span>
             </div>
         </div>
 
         <!-- 📊 Stats Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 font-kanit">
-            <div
-                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <div class="p-5 rounded-2xl shadow-2xs border border-gray-200 bg-white flex items-center gap-4 hover:shadow-xs transition">
+                <div class="w-12 h-12 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center text-xl border border-sky-100">
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <div>
-                    <p class="text-gray-400 text-xs font-semibold uppercase">ผู้ติดตามทั้งหมด</p>
-                    <p class="text-2xl font-black text-gray-800">{{ $totalSubscribers }}</p>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">ผู้ติดตามทั้งหมด</p>
+                    <p class="text-2xl font-black text-gray-900 mt-0.5">{{ $totalSubscribers }}</p>
                 </div>
             </div>
 
-            <div
-                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
+            <div class="p-5 rounded-2xl shadow-2xs border border-gray-200 bg-white flex items-center gap-4 hover:shadow-xs transition">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl border border-emerald-100">
                     <i class="fa-solid fa-square-check"></i>
                 </div>
                 <div>
-                    <p class="text-gray-400 text-xs font-semibold uppercase">เปิดรับแจ้งเตือน</p>
-                    <p class="text-2xl font-black text-gray-800">{{ $activeSubscribers }}</p>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">เปิดรับแจ้งเตือน</p>
+                    <p class="text-2xl font-black text-gray-900 mt-0.5">{{ $activeSubscribers }}</p>
                 </div>
             </div>
 
-            <div
-                class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition">
-                <div class="w-14 h-14 bg-gray-50 text-gray-500 rounded-2xl flex items-center justify-center text-2xl">
+            <div class="p-5 rounded-2xl shadow-2xs border border-gray-200 bg-white flex items-center gap-4 hover:shadow-xs transition">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl border border-amber-100">
                     <i class="fa-solid fa-bell-slash"></i>
                 </div>
                 <div>
-                    <p class="text-gray-400 text-xs font-semibold uppercase">ระงับชั่วคราว</p>
-                    <p class="text-2xl font-black text-gray-800">{{ $pausedSubscribers }}</p>
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">ระงับชั่วคราว</p>
+                    <p class="text-2xl font-black text-gray-900 mt-0.5">{{ $pausedSubscribers }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Main Content Area (Full Width Layout) -->
-        <div class="space-y-8 font-kanit">
+        <div class="space-y-6">
             <!-- Table Card -->
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-8 border-b border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800">รายชื่อผู้ลงทะเบียนรับแจ้งเตือน</h2>
+            <div class="bg-white rounded-2xl shadow-2xs border border-gray-200 overflow-hidden">
+                <div class="p-5 md:p-6 border-b border-gray-200 bg-gray-50/40">
+                    <h2 class="text-lg font-bold text-gray-900">รายชื่อผู้ลงทะเบียนรับแจ้งเตือน</h2>
+                    <p class="text-xs text-gray-500">ควบคุมการอนุญาตส่งผลแล็บอัตโนมัติไปยังบัญชี Telegram แต่ละท่าน</p>
                 </div>
 
                 <div class="overflow-x-auto">
                     @if ($subscribers->isEmpty())
-                        <div class="p-20 text-center text-gray-300">
-                            <i class="fa-solid fa-face-dashed text-6xl mb-4 text-gray-100"></i>
-                            <p class="font-bold italic">ยังไม่มีผู้ลงทะเบียนขอรับการแจ้งเตือน</p>
+                        <div class="p-16 text-center text-gray-400">
+                            <i class="fa-solid fa-bell-slash text-4xl mb-3 text-gray-300 block"></i>
+                            <p class="font-bold text-sm text-gray-500">ยังไม่มีผู้ลงทะเบียนขอรับการแจ้งเตือน</p>
                         </div>
                     @else
-                        <table class="min-w-full text-sm">
-                            <thead class="bg-gray-50/50">
+                        <table class="min-w-full text-xs">
+                            <thead class="bg-gray-50 text-gray-700 font-bold border-b border-gray-200">
                                 <tr>
-                                    <th class="px-8 py-4 text-left font-bold text-gray-400 uppercase tracking-wider">
-                                        บัญชีผู้ใช้</th>
-                                    <th class="px-6 py-4 text-left font-bold text-gray-400 uppercase tracking-wider">PM /
-                                        Chat ID</th>
-                                    <th class="px-6 py-4 text-center font-bold text-gray-400 uppercase tracking-wider">
-                                        สถานะการรับ</th>
-                                    <th class="px-8 py-4 text-center font-bold text-gray-400 uppercase tracking-wider">
-                                        การจัดการ</th>
+                                    <th class="px-6 py-3.5 text-left uppercase tracking-wider">บัญชีผู้ใช้</th>
+                                    <th class="px-6 py-3.5 text-left uppercase tracking-wider">PM / Chat ID</th>
+                                    <th class="px-6 py-3.5 text-center uppercase tracking-wider">สถานะการรับ</th>
+                                    <th class="px-6 py-3.5 text-center uppercase tracking-wider">การจัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
+                            <tbody class="divide-y divide-gray-100 bg-white">
                                 @foreach ($subscribers as $subscriber)
-                                    <tr id="row_{{ $subscriber->id }}" class="hover:bg-gray-50/50 transition-colors">
-                                        <td class="px-8 py-5 flex items-center gap-4">
-                                            <div
-                                                class="h-10 w-10 flex-shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 font-bold border border-gray-200 uppercase">
+                                    <tr id="row_{{ $subscriber->id }}" class="hover:bg-sky-50/40 transition-colors">
+                                        <td class="px-6 py-4 flex items-center gap-3">
+                                            <div class="h-9 w-9 flex-shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-700 font-bold border border-gray-200 uppercase shadow-2xs text-xs">
                                                 {{ mb_substr($subscriber->fullName, 0, 1) }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-gray-900 leading-none mb-1">
+                                                <div class="font-bold text-gray-900 leading-tight">
                                                     {{ $subscriber->fullName }}</div>
-                                                <div class="text-[11px] text-gray-400 font-medium uppercase tracking-wider">
+                                                <div class="text-xs text-gray-500 font-medium tracking-wide mt-0.5">
                                                     {{ $subscriber->position }}</div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-5">
-                                            <div class="text-sm font-bold text-gray-600">PM: {{ $subscriber->pm }}</div>
-                                            <div class="text-[10px] font-mono text-gray-400 uppercase tracking-tight">CID:
-                                                {{ $subscriber->chat_id }}</div>
+                                        <td class="px-6 py-4">
+                                            <div class="text-xs font-bold text-gray-800">PM: {{ $subscriber->pm }}</div>
+                                            <div class="text-xs font-mono text-gray-500 tracking-tight mt-0.5">CID: {{ $subscriber->chat_id }}</div>
                                         </td>
-                                        <td class="px-6 py-5 text-center status-cell">
+                                        <td class="px-6 py-4 text-center status-cell">
                                             @if ($subscriber->allowed)
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
                                                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                                     กำลังรับแจ้งเตือน
                                                 </span>
                                             @else
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-100 uppercase">
-                                                    <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span> ระงับชั่วคราว
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 uppercase">
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                                                    ระงับชั่วคราว
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-8 py-5 text-center action-cell">
-                                            <div class="flex justify-center items-center gap-3">
+                                        <td class="px-6 py-4 text-center action-cell">
+                                            <div class="flex justify-center items-center gap-2">
                                                 <button type="button"
-                                                    class="toggle-notify-btn h-9 w-9 flex items-center justify-center rounded-xl transition-all shadow-sm border {{ $subscriber->allowed ? 'bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-600 hover:text-white' : 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-600 hover:text-white' }}"
+                                                    class="toggle-notify-btn min-h-[38px] min-w-[38px] px-3 py-1.5 flex items-center justify-center rounded-xl transition-all shadow-2xs border cursor-pointer {{ $subscriber->allowed ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-600 hover:text-white' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white' }}"
                                                     data-id="{{ $subscriber->id }}"
+                                                    aria-label="{{ $subscriber->allowed ? 'ระงับชั่วคราว' : 'เปิดรับการแจ้งเตือน' }}"
                                                     title="{{ $subscriber->allowed ? 'ระงับชั่วคราว' : 'เปิดรับการแจ้งเตือน' }}">
-                                                    <i
-                                                        class="fa-solid {{ $subscriber->allowed ? 'fa-bell-slash' : 'fa-bell' }} text-xs"></i>
+                                                    <i class="fa-solid {{ $subscriber->allowed ? 'fa-bell-slash' : 'fa-bell' }} text-xs"></i>
                                                 </button>
 
                                                 <button type="button"
-                                                    class="del-notify-btn h-9 w-9 flex items-center justify-center rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                    class="del-notify-btn min-h-[38px] min-w-[38px] px-3 py-1.5 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all shadow-2xs cursor-pointer"
                                                     data-id="{{ $subscriber->id }}"
-                                                    data-name="{{ $subscriber->fullName }}">
+                                                    data-name="{{ $subscriber->fullName }}"
+                                                    aria-label="ลบผู้ติดตาม {{ $subscriber->fullName }}"
+                                                    title="ลบผู้ติดตาม">
                                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                                 </button>
                                             </div>
@@ -194,22 +185,21 @@
                             let isAllowed = response.allowed;
                             let $row = $('#row_' + id);
 
-                            // Update Status Badge (Consistency Style)
+                            // Update Status Badge (Design System Compliant)
                             let statusHtml = isAllowed ?
-                                '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> กำลังรับแจ้งเตือน</span>' :
-                                '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-600 border border-red-100 uppercase"><span class="h-1.5 w-1.5 rounded-full bg-red-500"></span> ระงับชั่วคราว</span>';
+                                '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> กำลังรับแจ้งเตือน</span>' :
+                                '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 uppercase"><span class="h-1.5 w-1.5 rounded-full bg-red-500"></span> ระงับชั่วคราว</span>';
                             $row.find('.status-cell').html(statusHtml);
 
-                            // Update Buttons (Consistency Style)
+                            // Update Buttons (Accessible & Design System Compliant)
                             let toggleBtnHtml = isAllowed ?
-                                `<button type="button" class="toggle-notify-btn h-9 w-9 flex items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-100 hover:bg-amber-600 hover:text-white transition-all shadow-sm" data-id="${id}" title="ระงับชั่วคราว"><i class="fa-solid fa-bell-slash text-xs"></i></button>` :
-                                `<button type="button" class="toggle-notify-btn h-9 w-9 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all shadow-sm" data-id="${id}" title="เปิดรับการแจ้งเตือน"><i class="fa-solid fa-bell text-xs"></i></button>`;
+                                `<button type="button" class="toggle-notify-btn min-h-[38px] min-w-[38px] px-3 py-1.5 flex items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-600 hover:text-white transition-all shadow-2xs cursor-pointer" data-id="${id}" aria-label="ระงับชั่วคราว" title="ระงับชั่วคราว"><i class="fa-solid fa-bell-slash text-xs"></i></button>` :
+                                `<button type="button" class="toggle-notify-btn min-h-[38px] min-w-[38px] px-3 py-1.5 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all shadow-2xs cursor-pointer" data-id="${id}" aria-label="เปิดรับการแจ้งเตือน" title="เปิดรับการแจ้งเตือน"><i class="fa-solid fa-bell text-xs"></i></button>`;
 
                             let delBtnHtml =
-                                `<button type="button" class="del-notify-btn h-9 w-9 flex items-center justify-center rounded-xl bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-all shadow-sm" data-id="${id}" data-name="${$row.find('div.font-bold').text()}"><i class="fa-solid fa-trash-can text-xs"></i></button>`;
+                                `<button type="button" class="del-notify-btn min-h-[38px] min-w-[38px] px-3 py-1.5 flex items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all shadow-2xs cursor-pointer" data-id="${id}" data-name="${$row.find('div.font-bold').text()}" aria-label="ลบผู้ติดตาม" title="ลบผู้ติดตาม"><i class="fa-solid fa-trash-can text-xs"></i></button>`;
 
-                            $row.find('.action-cell div').html(toggleBtnHtml + ' ' +
-                            delBtnHtml);
+                            $row.find('.action-cell div').html(toggleBtnHtml + ' ' + delBtnHtml);
                             showToast(response.message, 'success');
                         }
                     },
@@ -234,8 +224,8 @@
                     html: `ต้องการลบ <strong>${name}</strong> ออกจากระบบรับแจ้งเตือนหรือไม่?`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#9ca3af',
+                    confirmButtonColor: 'var(--status-danger-solid)',
+                    cancelButtonColor: 'var(--neutral-solid)',
                     confirmButtonText: 'ลบออก',
                     cancelButtonText: 'ยกเลิก',
                     reverseButtons: true,
@@ -258,8 +248,7 @@
                                     $row.fadeOut(300, function() {
                                         $(this).remove();
                                         if ($('tbody tr').length === 0) {
-                                            location
-                                        .reload(); // Reload to show empty state
+                                            location.reload();
                                         }
                                     });
                                 }

@@ -9,10 +9,12 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\NotifyLabResults;
 
-Schedule::job(new NotifyLabResults)
-    ->hourly()
-    ->withoutOverlapping()
-    ->name('notify_lab_results');
+if (config('services.lab_notifications.enabled')) {
+    Schedule::job(new NotifyLabResults)
+        ->hourly()
+        ->withoutOverlapping()
+        ->name('notify_lab_results');
+}
 
 Schedule::command('telegram:sync')
     ->everyMinute()

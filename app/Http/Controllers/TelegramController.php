@@ -16,10 +16,17 @@ class TelegramController extends Controller
     public function notify(Request $request)
     {
         try {
-            $hn = $request->input('hn');
-            $action = $request->input('action');
-            $firstname = $request->input('firstname') ?? '';
-            $lastname = $request->input('lastname') ?? '';
+            $validated = $request->validate([
+                'hn' => 'required|string|max:30',
+                'action' => 'required|string|max:255',
+                'firstname' => 'nullable|string|max:100',
+                'lastname' => 'nullable|string|max:100',
+            ]);
+
+            $hn = htmlspecialchars($validated['hn'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $action = htmlspecialchars($validated['action'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $firstname = htmlspecialchars($validated['firstname'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $lastname = htmlspecialchars($validated['lastname'] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
             $fullname = trim($firstname . ' ' . $lastname);
 
             // สร้างข้อความที่จะส่ง
@@ -86,7 +93,8 @@ class TelegramController extends Controller
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
             $response = curl_exec($ch);
@@ -124,6 +132,9 @@ class TelegramController extends Controller
                                 $updatedChats++;
                                 $status = 'updated';
                             } else {
+                                $chatData['is_active'] = true;
+                                $chatData['allowed'] = false;
+                                $chatData['created_at'] = now();
                                 DB::connection('mysql')->table('telegram_subscribers')->insert($chatData);
                                 $newChats++;
                                 $status = 'new';
@@ -182,8 +193,6 @@ class TelegramController extends Controller
             'username' => $from['username'] ?? $chat['username'] ?? null,
             'title' => $chat['title'] ?? null,
             'last_message_at' => isset($message['date']) ? Carbon::createFromTimestamp($message['date'])->setTimezone(config('app.timezone')) : now(),
-            'is_active' => true,
-            'allowed' => true,
         ];
 
         // เพิ่ม pm เฉพาะตอน insert หรือมี username ใหม่
@@ -192,9 +201,6 @@ class TelegramController extends Controller
         }
 
         // เพิ่ม created_at เฉพาะตอน insert
-        if (!DB::table('telegram_subscribers')->where('chat_id', $chat['id'])->exists()) {
-            $data['created_at'] = now();
-        }
 
         return $data;
     }
@@ -256,23 +262,6 @@ class TelegramController extends Controller
         }
     }
 
-    public function send(Request $request)
-    {
-        $request->validate([
-            'chat_id' => 'required',
-            'message' => 'required|string'
-        ]);
-
-        try {
-            TelegramHelper::sendMessage($request->chat_id, $request->message);
-            return response()->json(['status' => 'ok']);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
 
     /**
      * รับข้อมูล Webhook จาก Telegram
@@ -298,6 +287,9 @@ class TelegramController extends Controller
                         ->where('chat_id', $chatId)
                         ->update($chatData);
                 } else {
+                    $chatData['is_active'] = true;
+                    $chatData['allowed'] = false;
+                    $chatData['created_at'] = now();
                     DB::connection('mysql')->table('telegram_subscribers')->insert($chatData);
                 }
             } catch (\Exception $e) {
@@ -344,7 +336,8 @@ class TelegramController extends Controller
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -374,7 +367,8 @@ class TelegramController extends Controller
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -390,5 +384,38 @@ class TelegramController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * ดึงข้อมูล QR Code สำหรับแจ้งเตือน Telegram ของผู้ใช้ปัจจุบัน
+     */
+    public function getQrData(Request $request)
+    {
+        $username = session('user.username');
+        if (!$username) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
+
+        $bot_username = env('TELEGRAM_BOT_USERNAME', 'brh_test_bot');
+        $telegramUrl = 'https://t.me/' . $bot_username . '?start=' . $username;
+        $qrSvg = (string) \SimpleSoftwareIO\QrCode\Facades\QrCode::size(240)->generate($telegramUrl);
+
+        $isSubscribed = false;
+        try {
+            $isSubscribed = DB::table('telegram_subscribers')
+                ->where('pm', $username)
+                ->where('is_active', 1)
+                ->exists();
+        } catch (\Exception $e) {
+            // Gracefully fallback if table does not exist
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'qr_svg' => $qrSvg,
+            'telegram_url' => $telegramUrl,
+            'username' => $username,
+            'is_subscribed' => $isSubscribed,
+        ]);
     }
 }

@@ -33,12 +33,14 @@ class AuthController extends Controller
 
 
 
-        if ($user && strtoupper(md5($request->password)) === $user->password) {
+        $legacyPasswordHash = strtoupper(md5($request->password));
+
+        if ($user && hash_equals((string) $user->password, $legacyPasswordHash)) {
 
             if (empty($role)) {
                 return back()->withErrors([
                     'username' => 'ไม่มีสิทธิ์เข้าใช้งานระบบ',
-                ])->withInput($request->only('username', 'password'));
+                ])->withInput($request->only('username'));
             }
 
             Auth::login($user);
@@ -53,16 +55,17 @@ class AuthController extends Controller
                 'last_activity' => now(),
             ]);
 
-            return redirect()->intended(route('index'))->with('success', 'เข้าสู่ระบบสำเร็จ');;
+            return redirect()->intended(route('amr.index'))->with('success', 'เข้าสู่ระบบสำเร็จ');
         }
 
         // ส่งกลับพร้อมข้อมูลเดิม รวมถึง password
         return back()->withErrors([
             'username' => 'Username หรือ Password ไม่ถูกต้อง',
-        ])->withInput($request->only('username', 'password', 'remember'));
+        ])->withInput($request->only('username'));
     }
     public function logout(Request $request)
     {
+        Auth::logout();
         Session::forget('user');
         // ล้าง session
         $request->session()->invalidate();
