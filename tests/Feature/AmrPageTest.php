@@ -7,6 +7,16 @@ use Tests\TestCase;
 
 class AmrPageTest extends TestCase
 {
+    public function test_release_version_is_consistent_across_application_pages(): void
+    {
+        $this->assertSame('1.2.0', config('app.version'));
+        $this->assertSame('03/09/2026', config('app.release_date'));
+
+        $loginHtml = view('auth.login', ['errors' => new \Illuminate\Support\ViewErrorBag])->render();
+        $this->assertStringContainsString('เวอร์ชัน 1.2.0', $loginHtml);
+        $this->assertStringContainsString('ปล่อยวันที่ 03/09/2026', $loginHtml);
+    }
+
     public function test_guest_is_redirected_from_amr_page(): void
     {
         $response = $this->get(route('amr.index'));
@@ -260,6 +270,7 @@ class AmrPageTest extends TestCase
 
     public function test_amr_layout_exposes_complete_accessible_theme_contract(): void
     {
+        session(['user' => ['username' => 'admin.user', 'logged_in' => true, 'role' => 'Admin']]);
         $patients = new LengthAwarePaginator([], 0, 50);
         $wards = collect();
         $filters = ['admit_date' => '', 'search' => '', 'ward' => '', 'm' => null, 'rm' => null];
@@ -313,7 +324,9 @@ class AmrPageTest extends TestCase
         $this->assertIsString($legacyIndexTemplate);
         $this->assertIsString($adminTemplate);
         $this->assertStringContainsString('BRHModalScroll?.set(`dom-modal:${modalID}`', $legacyIndexTemplate);
-        $this->assertStringContainsString('BRHModalScroll?.set(`dom-modal:${id}`', $adminTemplate);
+        $this->assertStringContainsString('window.BRHModalScroll?.set(scrollKey(id), true);', $adminTemplate);
+        $this->assertStringContainsString('window.BRHModalScroll?.set(scrollKey(id), false);', $adminTemplate);
+        $this->assertStringContainsString("closeModal('editUserRoleModal');", $adminTemplate);
         $amrTemplate = file_get_contents(resource_path('views/amr/index.blade.php'));
         $this->assertIsString($amrTemplate);
         $this->assertStringContainsString('background-color: var(--input-bg) !important;', $amrTemplate);
@@ -330,6 +343,7 @@ class AmrPageTest extends TestCase
 
     public function test_empty_organism_submission_keeps_settings_modal_open_and_is_rejected(): void
     {
+        session(['user' => ['username' => 'admin.user', 'logged_in' => true, 'role' => 'Admin']]);
         $patients = new LengthAwarePaginator([], 0, 50);
         $wards = collect();
         $filters = ['admit_date' => '', 'search' => '', 'ward' => '', 'm' => null, 'rm' => null];
@@ -346,5 +360,70 @@ class AmrPageTest extends TestCase
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['code', 'name', 'severity']);
+    }
+
+    public function test_user_management_uses_one_reusable_modal_and_releases_scroll_lock(): void
+    {
+        $users = collect([
+            (object) [
+                'username' => 'demo.user',
+                'tname' => 'นาย',
+                'fname' => 'ทดสอบ',
+                'lname' => 'ระบบ',
+                'position' => 'เจ้าหน้าที่',
+                'role_id' => 1,
+                'role_name' => 'Admin',
+            ],
+        ]);
+        $roles = collect([(object) ['id' => 1, 'name' => 'Admin']]);
+        $activeSessions = collect(['demo.user' => (object) ['username' => 'demo.user']]);
+
+        $recentAuditLogs = collect();
+        $html = view('admin.management', compact('users', 'roles', 'activeSessions', 'recentAuditLogs'))->render();
+
+        $this->assertSame(1, substr_count($html, 'id="editUserRoleModal"'));
+        $this->assertStringContainsString('data-update-action=', $html);
+        $this->assertStringContainsString('บัญชีบุคลากรยังคงอยู่ แต่จะเข้าใช้ระบบนี้ไม่ได้', $html);
+        $this->assertStringContainsString('window.BRHModalScroll?.set(scrollKey(id), false);', $html);
+        $this->assertStringContainsString("closeModal('editUserRoleModal');", $html);
+        $this->assertStringContainsString('กิจกรรมสิทธิ์ล่าสุด', $html);
+        $this->assertStringContainsString('ผู้มีสิทธิ์ในระบบ', $html);
+        $this->assertStringContainsString('ค้นหาบุคลากรเพื่อเพิ่ม', $html);
+        $this->assertStringContainsString("activeScope === 'directory'", $html);
+    }
+
+    public function test_regular_user_does_not_see_admin_navigation_or_settings_tabs(): void
+    {
+        session(['user' => ['username' => 'regular.user', 'logged_in' => true, 'role' => 'User']]);
+        $regularHtml = view('layout.navbar')->render();
+
+        $this->assertStringNotContainsString('จัดการผู้ใช้', $regularHtml);
+        $this->assertStringNotContainsString('จัดการเชื้อดื้อยา AMR', $regularHtml);
+        $this->assertStringNotContainsString('ประวัติการเติมเชื้อ (Logs)', $regularHtml);
+
+        session(['user' => ['username' => 'admin.user', 'logged_in' => true, 'role' => 'Admin']]);
+        $adminHtml = view('layout.navbar')->render();
+
+        $this->assertStringContainsString('จัดการผู้ใช้', $adminHtml);
+        $this->assertStringContainsString('จัดการเชื้อดื้อยา AMR', $adminHtml);
+        $this->assertStringContainsString('ประวัติการเติมเชื้อ (Logs)', $adminHtml);
+    }
+
+    public function test_admin_settings_endpoints_require_admin_middleware(): void
+    {
+        foreach ([
+            'admin.management',
+            'admin.findUser',
+            'settings.organisms.index',
+            'settings.organisms.store',
+            'settings.organisms.reorder',
+            'settings.organisms.toggle',
+            'settings.audit.logs',
+        ] as $routeName) {
+            $route = app('router')->getRoutes()->getByName($routeName);
+
+            $this->assertNotNull($route, "ไม่พบ route {$routeName}");
+            $this->assertContains('is.admin', $route->gatherMiddleware(), "route {$routeName} ไม่ได้กันสิทธิ์ Admin");
+        }
     }
 }

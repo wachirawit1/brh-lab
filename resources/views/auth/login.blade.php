@@ -136,7 +136,7 @@
 
         <!-- Footer -->
         <footer class="mt-4" style="text-align:center; color:#6c757d; font-size:0.875rem;">
-            © {{ date('Y') }} Project Name — เวอร์ชัน {{ env('APP_VERSION', '1.0.0') }}.
+            © {{ date('Y') }} ระบบแจ้งเตือนผลแล็บ — เวอร์ชัน {{ config('app.version') }} (ปล่อยวันที่ {{ config('app.release_date') }})
             พัฒนาโดย <a href="#" target="_blank">นายวชิรวิทย์ กุลสุทธิชัย</a>
         </footer>
     </div>

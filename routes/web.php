@@ -57,16 +57,17 @@ Route::middleware(['logged.in', 'check.session'])->group(function () {
     Route::get('/amr/organisms/{hn}', [AmrController::class, 'getOrganisms'])->name('amr.organisms.get');
     Route::post('/amr/organisms', [AmrController::class, 'storeOrganisms'])->name('amr.organisms.store');
 
+});
+
+// Admin routes
+Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function () {
     // Settings Hub: Master Data & Audit Logs
     Route::get('/settings/master-organisms', [AmrController::class, 'getMasterOrganisms'])->name('settings.organisms.index');
     Route::post('/settings/master-organisms', [AmrController::class, 'storeMasterOrganism'])->name('settings.organisms.store');
     Route::patch('/settings/master-organisms/reorder', [AmrController::class, 'reorderMasterOrganisms'])->name('settings.organisms.reorder');
     Route::patch('/settings/master-organisms/{id}/toggle', [AmrController::class, 'toggleMasterOrganism'])->name('settings.organisms.toggle');
     Route::get('/settings/audit-logs', [AmrController::class, 'getAuditLogs'])->name('settings.audit.logs');
-});
 
-// Admin routes
-Route::middleware(['logged.in', 'check.session', 'is.admin'])->group(function () {
     Route::post('/notify', [TelegramController::class, 'notify'])->name('notify');
     Route::get('/admin/notify-management', [AdminController::class, 'notificationSettings'])->name('admin.notifySettings');
     Route::post('/admin/notify-management/update', [AdminController::class, 'updateNotificationStatus'])->name('admin.updateNotificationStatus');

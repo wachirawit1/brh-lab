@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Account;
+use App\Support\AuditLogger;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
@@ -38,6 +39,15 @@ class AuthController extends Controller
         if ($user && hash_equals((string) $user->password, $legacyPasswordHash)) {
 
             if (empty($role)) {
+                AuditLogger::record($request, 'auth.login_denied', 'ปฏิเสธการเข้าสู่ระบบเนื่องจากไม่มีสิทธิ์', [
+                    'category' => 'authentication',
+                    'result' => 'denied',
+                    'actor_username' => $request->username,
+                    'target_type' => 'user',
+                    'target_id' => $request->username,
+                    'metadata' => ['reason' => 'role_not_assigned'],
+                ]);
+
                 return back()->withErrors([
                     'username' => 'ไม่มีสิทธิ์เข้าใช้งานระบบ',
                 ])->withInput($request->only('username'));
@@ -55,16 +65,35 @@ class AuthController extends Controller
                 'last_activity' => now(),
             ]);
 
+            AuditLogger::record($request, 'auth.login_success', 'เข้าสู่ระบบสำเร็จ', [
+                'category' => 'authentication',
+                'target_type' => 'session',
+                'metadata' => ['role' => $role],
+            ]);
+
             return redirect()->intended(route('amr.index'))->with('success', 'เข้าสู่ระบบสำเร็จ');
         }
 
-        // ส่งกลับพร้อมข้อมูลเดิม รวมถึง password
+        AuditLogger::record($request, 'auth.login_failed', 'เข้าสู่ระบบไม่สำเร็จ', [
+            'category' => 'authentication',
+            'result' => 'failed',
+            'actor_username' => $request->username,
+            'target_type' => 'user',
+            'target_id' => $request->username,
+            'metadata' => ['reason' => 'invalid_credentials'],
+        ]);
+
         return back()->withErrors([
             'username' => 'Username หรือ Password ไม่ถูกต้อง',
         ])->withInput($request->only('username'));
     }
     public function logout(Request $request)
     {
+        AuditLogger::record($request, 'auth.logout', 'ออกจากระบบ', [
+            'category' => 'authentication',
+            'target_type' => 'session',
+        ]);
+
         Auth::logout();
         Session::forget('user');
         // ล้าง session

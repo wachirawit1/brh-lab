@@ -1,3 +1,5 @@
+@php($isAdmin = session('user.role') === 'Admin')
+
 <script>
     function initNavbarState() {
         if (!window.Alpine) return;
@@ -349,6 +351,7 @@
                                     <span>QR แจ้งเตือน Telegram</span>
                                 </button>
 
+                                @if ($isAdmin)
                                 <a href="{{ route('admin.notifySettings') }}"
                                     class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 transition flex items-center gap-2.5 font-medium">
                                     <i class="fa-solid fa-bell w-5 text-center text-amber-500 text-base"></i>
@@ -359,6 +362,7 @@
                                     <i class="fa-solid fa-users-gear w-5 text-center text-indigo-500 text-base"></i>
                                     <span>จัดการผู้ใช้</span>
                                 </a>
+                                @endif
                             </div>
 
                             <div class="border-t border-gray-100 my-1"></div>
@@ -437,6 +441,7 @@
                     </div>
                 </div>
                 <div class="mt-3 space-y-1">
+                    @if ($isAdmin)
                     <a href="{{ route('admin.notifySettings') }}"
                         class="block px-4 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50">
                         <i class="fa-solid fa-bell w-5 text-center text-gray-400 mr-2"></i> จัดการแจ้งเตือน
@@ -445,6 +450,7 @@
                         class="block px-4 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50">
                         <i class="fa-solid fa-users-gear w-5 text-center text-gray-400 mr-2"></i> จัดการผู้ใช้
                     </a>
+                    @endif
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
@@ -574,6 +580,7 @@
                         <span>ดึงข้อมูลอัตโนมัติ</span>
                     </button>
 
+                    @if ($isAdmin)
                     <button type="button" @click="currentTab = 'organisms'; loadMasterOrganisms()"
                         :class="currentTab === 'organisms' ? 'bg-white text-brand-700 shadow-xs font-semibold ring-1 ring-gray-200' : 'text-gray-600 hover:bg-gray-100/80'"
                         class="flex w-auto shrink-0 items-center gap-2.5 min-h-10 whitespace-nowrap rounded-xl px-3 py-2.5 text-left text-xs transition md:w-full">
@@ -587,6 +594,7 @@
                         <i class="fa-solid fa-clock-rotate-left text-sm w-4 text-center" :class="currentTab === 'logs' ? 'text-brand-600' : 'text-gray-400'"></i>
                         <span>ประวัติการเติมเชื้อ (Logs)</span>
                     </button>
+                    @endif
                 </div>
 
                 <!-- Right Tab Body -->
@@ -787,6 +795,7 @@
                         </div>
                     </div>
 
+                    @if ($isAdmin)
                     <!-- TAB 3: Master AMR Organisms -->
                     <div x-show="currentTab === 'organisms'" class="space-y-5">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -888,13 +897,13 @@
                                                         :disabled="savingOrganismOrder || idx === 0"
                                                         :aria-label="`เลื่อน ${org.name} ขึ้น`" title="เลื่อนขึ้น"
                                                         class="inline-flex h-5 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-25">
-                                                        <i class="fa-solid fa-chevron-up text-[9px]" aria-hidden="true"></i>
+                                                        <i class="fa-solid fa-chevron-up text-xs" aria-hidden="true"></i>
                                                     </button>
                                                     <button type="button" @click="moveOrganism(org.id, 1)"
                                                         :disabled="savingOrganismOrder || idx === activeMasterOrganisms().length - 1"
                                                         :aria-label="`เลื่อน ${org.name} ลง`" title="เลื่อนลง"
                                                         class="inline-flex h-5 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-25">
-                                                        <i class="fa-solid fa-chevron-down text-[9px]" aria-hidden="true"></i>
+                                                        <i class="fa-solid fa-chevron-down text-xs" aria-hidden="true"></i>
                                                     </button>
                                                 </span>
                                             </div>
@@ -1004,6 +1013,7 @@
                             </table>
                         </div>
                     </div>
+                    @endif
                 </div>
             </div>
 

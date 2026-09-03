@@ -11,6 +11,12 @@
 /.phpunit.cache
 /.vscode
 /.zed
+/.agents
+/.claude
+/.codex
+/.gemini
+/.impeccable
+/DESIGN.md
 /auth.json
 /node_modules
 /public/build

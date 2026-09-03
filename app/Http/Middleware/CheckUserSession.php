@@ -25,7 +25,9 @@ class CheckUserSession
 
         // 1. ตรวจสอบว่าผู้ใช้ยังมีสิทธิ์อยู่ในระบบฐานข้อมูลจริงๆ หรือไม่ (Real-time Guard)
         $userDB = DB::connection('mysql')->table('account_role')
-            ->where('username', Session::get('user.username'))
+            ->leftJoin('role', 'account_role.role_id', '=', 'role.id')
+            ->where('account_role.username', Session::get('user.username'))
+            ->select('account_role.username', 'role.name as role_name')
             ->first();
 
         if (!$userDB) {
@@ -33,6 +35,9 @@ class CheckUserSession
             Auth::logout();
             return redirect('/login')->with('error', 'บัญชีของคุณถูกระงับหรือไม่มีสิทธิ์เข้าใช้งาน');
         }
+
+        // ใช้สิทธิ์ล่าสุดจากฐานข้อมูลเป็นแหล่งข้อมูลเดียวสำหรับเมนูและ middleware อื่น
+        Session::put('user.role', $userDB->role_name);
 
         $lastActivity = Session::get('user.last_activity');
         $now = now();
