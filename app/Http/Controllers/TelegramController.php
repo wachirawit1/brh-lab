@@ -15,6 +15,10 @@ class TelegramController extends Controller
      */
     public function notify(Request $request)
     {
+        if (! config('services.telegram.notify_enabled')) {
+            return response()->json(['success' => false, 'message' => 'ระบบแจ้งเตือนยังไม่เปิดใช้งาน'], 503);
+        }
+
         try {
             $validated = $request->validate([
                 'hn' => 'required|string|max:30',
@@ -38,6 +42,8 @@ class TelegramController extends Controller
 
             $subscribers = DB::connection('mysql')
                 ->table('telegram_subscribers')
+                ->where('allowed', true)
+                ->where('is_active', true)
                 ->get();
 
             $successCount = 0;
@@ -51,7 +57,7 @@ class TelegramController extends Controller
                 } catch (\Exception $e) {
                     // บันทึกข้อผิดพลาดหากไม่สามารถส่งข้อความได้
                     $errorCount++;
-                    $errors[] = "Chat ID {$subscriber->chat_id}: " . $e->getMessage();
+                    $errors[] = 'ส่งข้อความไม่สำเร็จ';
                     Log::error("ไม่สามารถส่งข้อความไปยัง Chat ID: {$subscriber->chat_id}", [
                         'error' => $e->getMessage(),
                         'hn' => $hn,
@@ -76,7 +82,7 @@ class TelegramController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'เกิดข้อผิดพลาดในการส่งแจ้งเตือน',
-                'error' => $e->getMessage()
+                'error' => 'Notification unavailable'
             ], 500);
         }
     }

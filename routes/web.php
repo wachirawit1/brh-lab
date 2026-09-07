@@ -21,13 +21,12 @@ Route::post('/login', [AuthController::class, 'login'])
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // เช็คสถานะ Session (ใช้โดย JavaScript Polling)
-Route::get('/check-session', function () {
+Route::get('/check-session', function (\Illuminate\Http\Request $request) {
     if (session()->has('user') && session('user.logged_in') === true) {
         // เช็คเวลา last_activity แบบเดียวกับใน CheckUserSession Middleware
         $lastActivity = session('user.last_activity');
-        if ($lastActivity && now()->diffInMinutes($lastActivity) > 60) {
-            session()->forget('user'); // เคลียร์ session
-            \Illuminate\Support\Facades\Auth::logout();
+        if (\App\Support\SessionSecurity::expired($lastActivity)) {
+            \App\Support\SessionSecurity::invalidate($request);
 
             return response()->json(['alive' => false, 'message' => 'Session Expired'], 401);
         }

@@ -36,6 +36,7 @@ return [
     ],
     
     'telegram' => [
+        'notify_enabled' => env('TELEGRAM_NOTIFY_ENABLED', false),
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
     ],
 

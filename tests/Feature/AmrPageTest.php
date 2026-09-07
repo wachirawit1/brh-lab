@@ -9,12 +9,12 @@ class AmrPageTest extends TestCase
 {
     public function test_release_version_is_consistent_across_application_pages(): void
     {
-        $this->assertSame('1.2.0', config('app.version'));
-        $this->assertSame('03/09/2026', config('app.release_date'));
+        $this->assertSame('1.3.0', config('app.version'));
+        $this->assertSame('07/09/2569', config('app.release_date'));
 
         $loginHtml = view('auth.login', ['errors' => new \Illuminate\Support\ViewErrorBag])->render();
-        $this->assertStringContainsString('เวอร์ชัน 1.2.0', $loginHtml);
-        $this->assertStringContainsString('ปล่อยวันที่ 03/09/2026', $loginHtml);
+        $this->assertStringContainsString('เวอร์ชัน 1.3.0', $loginHtml);
+        $this->assertStringContainsString('ปล่อยวันที่ 07/09/2569', $loginHtml);
     }
 
     public function test_guest_is_redirected_from_amr_page(): void
@@ -182,6 +182,7 @@ class AmrPageTest extends TestCase
         $this->assertDatabaseCount('amr_organisms_master', 17);
         $this->assertSame($expectedCodes, \App\Models\AmrOrganismMaster::active()->pluck('code')->all());
 
+        $this->artisan('migrate', ['--path' => 'database/migrations/2026_09_03_000001_create_system_audit_logs_table.php']);
         $response = $this->withoutMiddleware()
             ->postJson(route('amr.organisms.store'), [
                 'hn' => '1234567',

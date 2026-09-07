@@ -294,7 +294,6 @@ class AppController extends Controller
             // เติมช่องว่างด้านหน้าให้ครบ 7 ตัวอักษร (ตามมาตรฐานฐานข้อมูล รพ.)
             $paddedHn = str_pad($trimmedHn, 7, ' ', STR_PAD_LEFT);
 
-            Log::info("Fetching Lab Results for HN: [{$trimmedHn}], Padded: [{$paddedHn}]");
 
             $labResults = DB::connection('sqlsrv')
                 ->table('Labres_m')
@@ -312,7 +311,12 @@ class AppController extends Controller
                     ];
                 });
 
-            Log::info("Found " . count($labResults) . " lab results for HN: {$trimmedHn}");
+            \App\Support\AuditLogger::record(request(), 'clinical.lab_viewed', 'เปิดดูประวัติผลแล็บ', [
+                'category' => 'clinical',
+                'target_type' => 'patient',
+                'target_id' => $trimmedHn,
+                'metadata' => ['result_count' => count($labResults)],
+            ]);
 
             return response()->json([
                 'labResults' => $labResults,

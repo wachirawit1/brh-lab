@@ -969,7 +969,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h4 class="text-sm font-bold text-gray-900">ประวัติการบันทึกเชื้อดื้อยา (Audit Logs)</h4>
-                                <p class="text-xs text-gray-500">ตรวจสอบประวัติ 30 รายการล่าสุดว่าใครเป็นผู้บันทึกเชื้อให้คนไข้รายใด</p>
+                                <p class="text-xs text-gray-500">30 เหตุการณ์ล่าสุด เริ่มเก็บประวัติก่อน–หลังตั้งแต่อัปเดตระบบ ไม่รวมการแก้ไขในอดีต</p>
                             </div>
                             <button type="button" @click="loadAuditLogs()"
                                 class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
@@ -999,6 +999,8 @@
                                             <td class="px-3.5 py-2.5 font-medium text-gray-700" x-text="log.ward_id || '-'"></td>
                                             <td class="px-3.5 py-2.5">
                                                 <div class="flex flex-wrap gap-1">
+                                                    <span class="w-full text-gray-500" x-text="'ก่อนแก้: ' + ((log.previous_organisms || []).join(', ') || 'ไม่มีเชื้อดื้อยา')"></span>
+                                                    <span class="w-full text-gray-500">หลังบันทึก:</span>
                                                     <template x-for="org in log.organisms" :key="org">
                                                         <span class="px-1.5 py-0.5 bg-red-50 border border-red-200 text-red-700 rounded text-xs font-bold" x-text="org"></span>
                                                     </template>

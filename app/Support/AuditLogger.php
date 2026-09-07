@@ -15,7 +15,7 @@ final class AuditLogger
 
     private static ?bool $tableAvailable = null;
 
-    public static function record(Request $request, string $event, string $action, array $context = []): void
+    public static function record(Request $request, string $event, string $action, array $context = [], ?\Illuminate\Database\Connection $transactionConnection = null): void
     {
         $actorUsername = $context['actor_username'] ?? session('user.username');
         $actorName = $context['actor_name'] ?? session('user.fullname');
@@ -41,6 +41,13 @@ final class AuditLogger
                 'route' => $request->route()?->getName(),
             ], $context['metadata'] ?? [])),
         ];
+
+        // Clinical mutations must roll back if their audit insert fails.
+        if ($transactionConnection !== null) {
+            $transactionConnection->table('system_audit_logs')->insert($record);
+            $transactionConnection->afterCommit(fn () => self::writeFileFallback($record));
+            return;
+        }
 
         self::writeFileFallback($record);
 

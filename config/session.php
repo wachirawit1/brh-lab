@@ -34,6 +34,9 @@ return [
 
     'lifetime' => (int) env('SESSION_LIFETIME',60),
 
+    // Independent of the storage lifetime; polling must not extend this deadline.
+    'idle_timeout' => (int) env('SESSION_IDLE_TIMEOUT', 60),
+
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*

@@ -16,7 +16,6 @@ class CheckUserSession
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    protected $timeout = 60; // กำหนดเวลา session หมดอายุ (นาที)
     public function handle(Request $request, Closure $next)
     {
         if (!Session::has('user') || Session::get('user.logged_in') !== true) {
@@ -31,8 +30,7 @@ class CheckUserSession
             ->first();
 
         if (!$userDB) {
-            Session::forget('user');
-            Auth::logout();
+            \App\Support\SessionSecurity::invalidate($request);
             return redirect('/login')->with('error', 'บัญชีของคุณถูกระงับหรือไม่มีสิทธิ์เข้าใช้งาน');
         }
 
@@ -43,9 +41,8 @@ class CheckUserSession
         $now = now();
 
         // 2. ตรวจสอบว่า session หมดอายุหรือไม่
-        if ($now->diffInMinutes($lastActivity) > $this->timeout) {
-            Session::forget('user');
-            Auth::logout();
+        if (\App\Support\SessionSecurity::expired($lastActivity)) {
+            \App\Support\SessionSecurity::invalidate($request);
             return redirect('/login')->with('error', 'Session หมดอายุ กรุณาล็อคอินใหม่');
         }
 
@@ -57,7 +54,7 @@ class CheckUserSession
                     'username' => Session::get('user.username'),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
-                    'last_page' => $request->fullUrl(),
+                    'last_page' => $request->route()?->getName() ?? $request->route()?->uri(),
                     'last_activity' => $now,
                     'updated_at' => $now
                 ]

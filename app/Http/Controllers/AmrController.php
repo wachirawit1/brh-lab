@@ -226,13 +226,36 @@ class AmrController extends Controller
                 'created_by' => $userName,
             ];
 
-            $record = DB::transaction(function () use ($hn, $registFlag, $data, $selectedOrganisms) {
-                $record = \App\Models\PatientAmrOrganism::updateOrCreate(
-                    ['hn' => $hn, 'regist_flag' => $registFlag],
-                    $data
-                );
+            $record = DB::transaction(function () use ($request, $hn, $registFlag, $data, $selectedOrganisms) {
+                $record = \App\Models\PatientAmrOrganism::where('hn', $hn)
+                    ->where('regist_flag', $registFlag)->lockForUpdate()->first();
+                $before = $record ? [
+                    'ward_id' => $record->ward_id,
+                    'organisms' => $record->selectedOrganisms->pluck('name')->values()->all(),
+                    'organism_codes' => $record->selectedOrganisms->pluck('code')->values()->all(),
+                ] : null;
+                if ($record) {
+                    $record->update($data);
+                } else {
+                    $record = \App\Models\PatientAmrOrganism::create(array_merge(
+                        ['hn' => $hn, 'regist_flag' => $registFlag], $data
+                    ));
+                }
 
                 $record->selectedOrganisms()->sync($selectedOrganisms->pluck('id'));
+
+                \App\Support\AuditLogger::record($request, 'clinical.organisms_saved', 'บันทึกข้อมูลเชื้อดื้อยา', [
+                    'category' => 'clinical',
+                    'target_type' => 'patient_amr',
+                    'target_id' => $hn,
+                    'old_values' => $before,
+                    'new_values' => [
+                        'ward_id' => $data['ward_id'],
+                        'organisms' => $selectedOrganisms->pluck('name')->values()->all(),
+                        'organism_codes' => $selectedOrganisms->pluck('code')->values()->all(),
+                    ],
+                    'metadata' => ['regist_flag' => $registFlag],
+                ], DB::connection());
 
                 return $record->load('selectedOrganisms');
             });
@@ -406,20 +429,24 @@ class AmrController extends Controller
     public function getAuditLogs()
     {
         try {
-            $logs = \App\Models\PatientAmrOrganism::with('selectedOrganisms')->latest('updated_at')
+            $logs = DB::connection('mysql')->table('system_audit_logs')
+                ->where('event', 'clinical.organisms_saved')->orderByDesc('id')
                 ->take(30)
                 ->get()
                 ->map(function ($item) {
-                    $positives = $item->selectedOrganisms->pluck('name')->values()->all();
+                    $after = json_decode($item->new_values ?? '{}', true) ?: [];
+                    $before = json_decode($item->old_values ?? '{}', true) ?: [];
+                    $metadata = json_decode($item->metadata ?? '{}', true) ?: [];
 
                     return [
                         'id' => $item->id,
-                        'hn' => $item->hn,
-                        'regist_flag' => $item->regist_flag,
-                        'ward_id' => $item->ward_id,
-                        'organisms' => $positives,
-                        'created_by' => $item->created_by ?: 'ไม่ระบุ',
-                        'updated_at' => $item->updated_at ? \App\Helpers\DateHelper::formatThaiDate($item->updated_at->format('Y-m-d'), 'short').' '.$item->updated_at->format('H:i น.') : '-',
+                        'hn' => $item->target_id,
+                        'regist_flag' => $metadata['regist_flag'] ?? null,
+                        'ward_id' => $after['ward_id'] ?? null,
+                        'organisms' => $after['organisms'] ?? [],
+                        'previous_organisms' => $before['organisms'] ?? [],
+                        'created_by' => $item->actor_name ?: $item->actor_username,
+                        'updated_at' => \App\Helpers\DateHelper::formatThaiDate(substr($item->occurred_at, 0, 10), 'short').' '.substr($item->occurred_at, 11, 5).' น.',
                     ];
                 });
 
